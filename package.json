@@ -2,9 +2,10 @@
   "name": "pawdyno",
   "version": "1.0.0",
   "description": "A multiplayer game of pawed critters climbing a wall for ultimate freedom and glory",
-  "main": "src/index.js",
+  "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
+    "build": "webpack -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,7 +28,10 @@
   },
   "homepage": "https://github.com/jiheh/pawDyno#readme",
   "dependencies": {
+    "css-loader": "^1.0.1",
     "express": "^4.16.4",
-    "pixi.js": "^4.8.2"
+    "style-loader": "^0.23.1",
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2"
   }
 }

@@ -2,12 +2,18 @@
 
 require('./style.css');
 
+import {Character, BodyPart} from './character.js';
+
 const app = new PIXI.Application({
   width: window.innerWidth,
   height: window.innerHeight,
   backgroundColor: 0x4fbdf2
 });
 document.body.appendChild(app.view);
+
+let test = new BodyPart('images/dogBody.svg', 1, 1, 1, 1, .3, 0, 0);
+
+console.log(test)
 
 // Create a container for every animal
 let dogBody = PIXI.Sprite.fromImage('images/dogBody.svg');

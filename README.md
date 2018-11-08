@@ -1,6 +1,6 @@
 ## Paw Dyno
 
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/quirkycorgi/Agamari/blob/master/LICENSE)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
 
 ### 2D Multiplayer Climbing Game
 Description about Paw Dyno here!

@@ -1,4 +1,4 @@
-import {VIEWPORT_WIDTH, VIEWPORT_HEIGHT} from './index.js';
+import {VIEWPORT_WIDTH, VIEWPORT_HEIGHT} from './index';
 
 const CHARACTER_REACH = 80
 const WIGGLE = 25

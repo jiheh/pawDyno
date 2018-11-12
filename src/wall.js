@@ -1,4 +1,4 @@
-import {VIEWPORT_WIDTH, VIEWPORT_HEIGHT} from './index.js';
+import {WIDTH, GAMEBOARD_HEIGHT} from './index.js';
 let small_words = require('./small_words.json')
 small_words = shuffle(small_words)
 
@@ -27,8 +27,8 @@ function shuffle(array) {
 
 export function initializeWall(){
 	let wall = []
-	let num_holds_x = Math.floor(VIEWPORT_WIDTH / CHARACTER_REACH)
-	let num_holds_y = Math.floor(VIEWPORT_HEIGHT / CHARACTER_REACH)
+	let num_holds_x = Math.floor(WIDTH / CHARACTER_REACH)
+	let num_holds_y = Math.floor(GAMEBOARD_HEIGHT / CHARACTER_REACH)
 	for(let xpos=0;xpos<num_holds_x;xpos++){
 		for(let ypos=0;ypos<num_holds_y;ypos++){
 			if(shouldDropHold(ypos, num_holds_y)){

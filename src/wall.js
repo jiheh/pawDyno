@@ -1,7 +1,29 @@
 import {VIEWPORT_WIDTH, VIEWPORT_HEIGHT} from './index.js';
+let small_words = require('./small_words.json')
+small_words = shuffle(small_words)
 
 const CHARACTER_REACH = 80
 const WIGGLE = 25
+
+function shuffle(array) {
+	// copied from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
 
 export function initializeWall(){
 	let wall = []
@@ -13,7 +35,7 @@ export function initializeWall(){
 				wall.push({
 					'x': xpos * CHARACTER_REACH + (Math.random() - 0.5) * WIGGLE
 					, 'y': ypos * CHARACTER_REACH + (Math.random() - 0.5) * WIGGLE
-					, 'label': 'abcdefghijklmnopqrstuvwxyz'[(xpos * num_holds_y + ypos) % 26]
+					, 'label': small_words[(xpos * num_holds_y + ypos)]
 				})
 			}
 		}

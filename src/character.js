@@ -1,14 +1,14 @@
-import {
-  NUM_PLAYERS,
-  VIEWPORT_WIDTH,
-  VIEWPORT_HEIGHT,
-  renderGameObject
-} from './index';
+import { NUM_PLAYERS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, renderGameObject } from './index';
+import { GlowFilter } from '@pixi/filter-glow';
 
+// Global variables
 const characterHeight = 110;
 const characterWidth = 52;
 const pawHeight = 20;
 const pawWidth = 20;
+
+// A list of containers for each character. Each container has a body and the four paws as children.
+let characterContainers = [];
 
 class Character {
   constructor(body, leftArm, rightArm, leftLeg, rightLeg) {
@@ -17,34 +17,30 @@ class Character {
     this.rightArm = rightArm;
     this.leftLeg = leftLeg;
     this.rightLeg = rightLeg;
-    this.index = 0;
+    this.currentPaw = leftArm;
   }
 
   move(targetX, targetY) {
-    let targetLimb = this.leftArm;
-    if (targetX > (this.body.x + 1/2 * this.body.width)) {
-      targetLimb = this.rightArm;
+    this.currentPaw.x = targetX;
+    this.currentPaw.y = targetY;
+    this.updateBody();
+
+    let nextPaw = this.leftArm;
+    if (this.currentPaw === this.leftArm) {
+      nextPaw = this.rightArm;
+    } else if (this.currentPaw === this.rightArm) {
+      nextPaw = this.leftLeg;
+    } else if (this.currentPaw === this.leftLeg) {
+      nextPaw = this.rightLeg;
     }
 
-    let limb;
-    if (this.index % 4 === 0) {
-      limb=this.leftArm;     
-    }
-    else if (this.index % 4 === 1) {
-      limb=this.rightArm;     
-    }
-    else if (this.index % 4 === 2) {
-      limb=this.leftLeg;     
-    }
-    else if (this.index % 4 === 3) {
-      limb=this.rightLeg;     
-    }
+    this.currentPaw = nextPaw;
+  }
 
-    limb.x = targetX;
-    limb.y = targetY;
-    moveBody(this);
-
-    this.index++;
+  updateBody() {
+    let paws = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
+    this.body.x = paws.reduce((sumX, paw) => sumX += this[paw].x, 0) / 4;
+    this.body.y = paws.reduce((sumY, paw) => sumY += this[paw].y, 0) / 4;
   }
 }
 
@@ -58,20 +54,7 @@ class CharacterPart {
   }
 }
 
-function moveBody(character) {
-  let paws = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
-  let x = 0;
-  let y = 0;
-
-  paws.forEach(paw => x += character[paw].x);
-  paws.forEach(paw => y += character[paw].y);
-
-  character.body.x = x / 4;
-  character.body.y = y /4;
-}
-
-
-// Functions to initialize characters
+// Initialize Character Instances
 export function initializeCharacters(numPlayers) {
   let characters = new Array(numPlayers).fill(null);
 
@@ -90,17 +73,16 @@ export function initializeCharacters(numPlayers) {
   });
 }
 
-let characterContainers = [];
-console.log("characterContainers", characterContainers);
-// Functions to render the character sprites
-export function renderCharacters(characters) {
-  characters.forEach(c => {
+// Initialize Character Sprites
+export function drawCharacterSprites(characters) {
+  let characterParts = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'body'];
+
+  characters.forEach(character => {
     let container = new PIXI.Container();
 
-    characterToSprites(c).forEach(s => {
-      // renderGameObject(s);
-      container.addChild(s);
-    });
+    characterParts
+      .map(partName => createSprite(character[partName], character.currentPaw, partName))
+      .forEach(sprite => container.addChild(sprite));
 
     characterContainers.push(container);
   });
@@ -108,31 +90,8 @@ export function renderCharacters(characters) {
   characterContainers.forEach(c => renderGameObject(c));
 }
 
-export function updateCharacterSprites(characters) {
-  characterContainers.forEach((container, indx) => {
-    updateBodyPartSprites(container, characters[indx]);
-  });
-}
-
-function updateBodyPartSprites(container, character) {
-  container.children.forEach(bodypart => {
-    bodypart.x = character[bodypart.name].x;
-    bodypart.y = character[bodypart.name].y;
-  })
-}
-
-
-function characterToSprites(character) {
-  let bodyParts = ['body', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
-
-  return bodyParts.map(bp => {
-    return bodyPartToSprite(character[bp], bp);
-  }).reverse();
-}
-
-function bodyPartToSprite(part, partName) {
+function createSprite(part, currentPaw, partName) {
   let sprite = PIXI.Sprite.fromImage(part.imageSrc);
-
   sprite.name = partName;
   sprite.height = part.height;
   sprite.width = part.width;
@@ -140,4 +99,17 @@ function bodyPartToSprite(part, partName) {
   sprite.y = part.y;
 
   return sprite;
+}
+
+// Update Character Sprites
+export function moveCharacterSprites(characters) {
+  characterContainers.forEach((container, idx) => {
+    let character = characters[idx];
+
+    container.children.forEach(partSprite => {
+      partSprite.x = character[partSprite.name].x;
+      partSprite.y = character[partSprite.name].y;
+      partSprite.filters = character[partSprite.name] === character.currentPaw ? [ new GlowFilter(2, 2, 0, 0xFFFFFF, .1) ] : [];
+    });
+  });
 }

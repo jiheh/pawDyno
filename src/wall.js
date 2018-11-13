@@ -1,7 +1,16 @@
-import {VIEWPORT_WIDTH, VIEWPORT_HEIGHT} from './index';
+import {VIEWPORT_WIDTH, VIEWPORT_HEIGHT, renderGameObject} from './index';
 
 const CHARACTER_REACH = 80
 const WIGGLE = 25
+
+export function drawWall (wall) {
+	for(let hold of wall){
+		let text = new PIXI.Text(hold.label, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+		text.x = hold.x
+		text.y = hold.y
+		renderGameObject(text)
+  }
+}
 
 export function initializeWall(){
 	let wall = []

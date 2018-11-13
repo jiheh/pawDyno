@@ -1,4 +1,4 @@
-import {VIEWPORT_WIDTH, VIEWPORT_HEIGHT} from './index.js';
+import {VIEWPORT_WIDTH, VIEWPORT_HEIGHT} from './index';
 let small_words = require('./small_words.json')
 small_words = shuffle(small_words)
 

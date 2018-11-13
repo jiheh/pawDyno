@@ -5,6 +5,9 @@ import {
   renderGameObject
 } from './index';
 
+const characterHeight = 160;
+const characterWidth = 60;
+
 class Character {
   constructor(body, leftArm, rightArm, leftLeg, rightLeg) {
     this.body = body;
@@ -32,16 +35,16 @@ class Character {
   }
 }
 
-class BodyPart {
-  constructor(imageSrc, height, width, rotation, anchorX, anchorY, position) {
+class CharacterPart {
+  constructor(imageSrc, height, width, rotation, anchorX, anchorY, x, y) {
     this.imageSrc = imageSrc;
+    this.height = height;
+    this.width = width;
     this.rotation = rotation;
     this.anchorX = anchorX;
     this.anchorY = anchorY;
-    this.height = height;
-    this.width = width;
-    this.x = (VIEWPORT_WIDTH / NUM_PLAYERS * position) * .75 + (width / 2);
-    this.y = VIEWPORT_HEIGHT - height;
+    this.x = x;
+    this.y = y;
   }
 }
 
@@ -70,11 +73,14 @@ export function initializeCharacters(numPlayers) {
   let characters = new Array(numPlayers).fill(null);
 
   return characters.map((_, idx) => {
-    let body = new BodyPart(`images/character${idx}/body.svg`, 160, 60, 0, .5, .5, idx + 1);
-    let lArm = new BodyPart(`images/character${idx}/leg.svg`, 90, 13, -.3, 0, 1, idx + 1);
-    let rArm = new BodyPart(`images/character${idx}/leg.svg`, 90, 13, .3, 1, 1, idx + 1);
-    let lLeg = new BodyPart(`images/character${idx}/leg.svg`, 90, 13, -2.5, 0, 0, idx + 1);
-    let rLeg = new BodyPart(`images/character${idx}/leg.svg`, 90, 13, 2.5, 1, 0, idx + 1);
+    let bodyX = VIEWPORT_WIDTH / NUM_PLAYERS * (idx + 1) * .75 + (characterWidth / 2);
+    let bodyY = VIEWPORT_HEIGHT - characterHeight / 2;
+
+    let body = new CharacterPart(`images/character${idx}/body.svg`, characterHeight, characterWidth, 0, .5, .5, bodyX, bodyY);
+    let lArm = new CharacterPart(`images/character${idx}/leg.svg`, 90, 13, -.75, 0, 1, bodyX, bodyY);
+    let rArm = new CharacterPart(`images/character${idx}/leg.svg`, 90, 13, .75, 1, 1, bodyX, bodyY);
+    let lLeg = new CharacterPart(`images/character${idx}/leg.svg`, 90, 13, -2.45, 1, 1, bodyX, bodyY);
+    let rLeg = new CharacterPart(`images/character${idx}/leg.svg`, 90, 13, 2.45, 0, 1, bodyX, bodyY);
 
     return new Character(body, lArm, rArm, lLeg, rLeg);
   });

@@ -1,4 +1,5 @@
 import { NUM_PLAYERS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, renderGameObject } from './index';
+import { GlowFilter } from '@pixi/filter-glow';
 
 // Global variables
 const characterHeight = 110;
@@ -16,25 +17,24 @@ class Character {
     this.rightArm = rightArm;
     this.leftLeg = leftLeg;
     this.rightLeg = rightLeg;
-    this.moves = 0;
+    this.currentPaw = leftArm;
   }
 
   move(targetX, targetY) {
-    let paw = this.leftArm;
+    this.currentPaw.x = targetX;
+    this.currentPaw.y = targetY;
+    this.updateBody();
 
-    if (this.moves % 4 === 1) {
-      paw = this.rightArm;
-    } else if (this.moves % 4 === 2) {
-      paw = this.leftLeg;
-    } else if (this.moves % 4 === 3) {
-      paw = this.rightLeg;
+    let nextPaw = this.leftArm;
+    if (this.currentPaw === this.leftArm) {
+      nextPaw = this.rightArm;
+    } else if (this.currentPaw === this.rightArm) {
+      nextPaw = this.leftLeg;
+    } else if (this.currentPaw === this.leftLeg) {
+      nextPaw = this.rightLeg;
     }
 
-    paw.x = targetX;
-    paw.y = targetY;
-
-    this.updateBody();
-    this.moves++;
+    this.currentPaw = nextPaw;
   }
 
   updateBody() {
@@ -81,7 +81,7 @@ export function drawCharacterSprites(characters) {
     let container = new PIXI.Container();
 
     characterParts
-      .map(partName => createSprite(character[partName], partName))
+      .map(partName => createSprite(character[partName], character.currentPaw, partName))
       .forEach(sprite => container.addChild(sprite));
 
     characterContainers.push(container);
@@ -90,7 +90,7 @@ export function drawCharacterSprites(characters) {
   characterContainers.forEach(c => renderGameObject(c));
 }
 
-function createSprite(part, partName) {
+function createSprite(part, currentPaw, partName) {
   let sprite = PIXI.Sprite.fromImage(part.imageSrc);
   sprite.name = partName;
   sprite.height = part.height;
@@ -109,6 +109,7 @@ export function moveCharacterSprites(characters) {
     container.children.forEach(partSprite => {
       partSprite.x = character[partSprite.name].x;
       partSprite.y = character[partSprite.name].y;
+      partSprite.filters = character[partSprite.name] === character.currentPaw ? [ new GlowFilter(2, 2, 0, 0xFFFFFF, .1) ] : [];
     });
   });
 }

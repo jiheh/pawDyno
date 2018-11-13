@@ -70,10 +70,13 @@ export function initializeCharacters(numPlayers) {
   let characters = new Array(numPlayers).fill(null);
 
   return characters.map((_, idx) => {
-    let body = new BodyPart('images/dogBody.svg', 160, 60, 0, .5, .5, idx + 1);
-    let lArm = new BodyPart('images/leg.svg', 90, 13, -.3, 1, 1, idx + 1);
+    let body = new BodyPart(`images/character${idx}/body.svg`, 160, 60, 0, .5, .5, idx + 1);
+    let lArm = new BodyPart(`images/character${idx}/leg.svg`, 90, 13, -.3, 0, 1, idx + 1);
+    let rArm = new BodyPart(`images/character${idx}/leg.svg`, 90, 13, .3, 1, 1, idx + 1);
+    let lLeg = new BodyPart(`images/character${idx}/leg.svg`, 90, 13, -2.5, 0, 0, idx + 1);
+    let rLeg = new BodyPart(`images/character${idx}/leg.svg`, 90, 13, 2.5, 1, 0, idx + 1);
 
-    return new Character(body, lArm, lArm, lArm, lArm);
+    return new Character(body, lArm, rArm, lLeg, rLeg);
   });
 }
 

@@ -2,11 +2,12 @@
 
 require('./style.css');
 
-import {Character, BodyPart} from './character.js';
-import {initializeWall} from './wall.js';
+import {initializeCharacters, renderCharacters} from './character';
+import {initializeWall} from './wall';
 
-export const VIEWPORT_WIDTH = 640;
-export const VIEWPORT_HEIGHT = 480;
+export const VIEWPORT_WIDTH = window.innerWidth;
+export const VIEWPORT_HEIGHT = window.innerHeight;
+export const NUM_PLAYERS = 4;
 
 var app = new PIXI.Application({
   width: VIEWPORT_WIDTH,
@@ -25,10 +26,19 @@ function renderWall () {
   }
 }
 
+export function renderGameObject(gameObject) {
+  app.stage.addChild(gameObject);
+}
+
 // Game Setup
 function startGame() {
   document.body.appendChild(app.view);
+
   renderWall();
+
+  let characters = initializeCharacters(NUM_PLAYERS);
+  renderCharacters(characters);
+
   mainLoop();
 }
 

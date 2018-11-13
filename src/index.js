@@ -30,15 +30,16 @@ function startGame() {
 
 // Game Loop
 function mainLoop() {
-  characters[0].move(100, 100);
-  characters[0].move(200, 200);
   moveCharacterSprites(characters);
-
   requestAnimationFrame(mainLoop);
 }
 
 // Initialize Game
 startGame();
+characters[0].move(100, 100);
+characters[0].move(100, 150);
+characters[0].move(250, 50);
+characters[0].move(250, 250);
 
 // Helper Functions
 export function renderGameObject(gameObject) {

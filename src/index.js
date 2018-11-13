@@ -1,10 +1,10 @@
 'use strict';
 
 require('./style.css');
+import {initializeCharacters, drawCharacterSprites, moveCharacterSprites} from './character';
+import {renderWall} from './wall';
 
-import {initializeCharacters, renderCharacters, updateCharacterSprites} from './character';
-import {initializeWall} from './wall';
-
+// Global variables
 export const VIEWPORT_WIDTH = window.innerWidth;
 export const VIEWPORT_HEIGHT = window.innerHeight;
 export const NUM_PLAYERS = 4;
@@ -13,48 +13,34 @@ let characters = [];
 var app = new PIXI.Application({
   width: VIEWPORT_WIDTH,
   height: VIEWPORT_HEIGHT,
-  backgroundColor:  0x555555
+  backgroundColor: 0x555555
 });
+document.body.appendChild(app.view);
 
-function renderWall () {
-  let wall = initializeWall();
-
-	for(let hold of wall){
-		let text = new PIXI.Text(hold.label, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
-		text.x = hold.x
-		text.y = hold.y
-		app.stage.addChild(text)
-  }
-}
-
-export function renderGameObject(gameObject) {
-  app.stage.addChild(gameObject);
-}
 
 // Game Setup
 function startGame() {
-  document.body.appendChild(app.view);
-
   renderWall();
 
   characters = initializeCharacters(NUM_PLAYERS);
-  renderCharacters(characters);
+  drawCharacterSprites(characters);
 
   mainLoop();
 }
 
 // Game Loop
-let tracker = 0;
 function mainLoop() {
   characters[0].move(100, 100);
+  characters[0].move(200, 200);
+  moveCharacterSprites(characters);
 
-  if (tracker % 10 === 0) {
-    updateCharacterSprites(characters);
-  }
-
-  tracker++;
   requestAnimationFrame(mainLoop);
 }
 
 // Initialize Game
 startGame();
+
+// Helper Functions
+export function renderGameObject(gameObject) {
+  app.stage.addChild(gameObject);
+}

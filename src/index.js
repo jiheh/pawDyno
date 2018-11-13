@@ -2,12 +2,13 @@
 
 require('./style.css');
 
-import {initializeCharacters, renderCharacters} from './character';
+import {initializeCharacters, renderCharacters, updateCharacterSprites} from './character';
 import {initializeWall} from './wall';
 
 export const VIEWPORT_WIDTH = window.innerWidth;
 export const VIEWPORT_HEIGHT = window.innerHeight;
 export const NUM_PLAYERS = 4;
+let characters = [];
 
 var app = new PIXI.Application({
   width: VIEWPORT_WIDTH,
@@ -36,14 +37,22 @@ function startGame() {
 
   renderWall();
 
-  let characters = initializeCharacters(NUM_PLAYERS);
+  characters = initializeCharacters(NUM_PLAYERS);
   renderCharacters(characters);
 
   mainLoop();
 }
 
 // Game Loop
+let tracker = 0;
 function mainLoop() {
+  characters[0].move(100, 100);
+
+  if (tracker % 10 === 0) {
+    updateCharacterSprites(characters);
+  }
+
+  tracker++;
   requestAnimationFrame(mainLoop);
 }
 

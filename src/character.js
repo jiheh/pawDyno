@@ -17,6 +17,7 @@ class Character {
     this.rightArm = rightArm;
     this.leftLeg = leftLeg;
     this.rightLeg = rightLeg;
+    this.index = 0;
   }
 
   move(targetX, targetY) {
@@ -25,15 +26,25 @@ class Character {
       targetLimb = this.rightArm;
     }
 
-    moveBody(this, targetX, targetY);
-
-    if (targetLimb === this.leftArm) {
-      moveLeftLeg(this, targetX, targetY);
-      moveLeftArm(this, targetX, targetY);
-    } else {
-      moveRightLeg(this, targetX, targetY);
-      moveRightArm(this, targetX, targetY);
+    let limb;
+    if (this.index % 4 === 0) {
+      limb=this.leftArm;     
     }
+    else if (this.index % 4 === 1) {
+      limb=this.rightArm;     
+    }
+    else if (this.index % 4 === 2) {
+      limb=this.leftLeg;     
+    }
+    else if (this.index % 4 === 3) {
+      limb=this.rightLeg;     
+    }
+
+    limb.x = targetX;
+    limb.y = targetY;
+    moveBody(this);
+
+    this.index++;
   }
 }
 
@@ -47,25 +58,18 @@ class CharacterPart {
   }
 }
 
-function moveBody(character, targetX, targetY) {
+function moveBody(character) {
+  let paws = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
+  let x = 0;
+  let y = 0;
 
+  paws.forEach(paw => x += character[paw].x);
+  paws.forEach(paw => y += character[paw].y);
+
+  character.body.x = x / 4;
+  character.body.y = y /4;
 }
 
-function moveLeftArm(character, targetX, targetY) {
-
-}
-
-function moveRightArm(character, targetX, targetY) {
-
-}
-
-function moveLeftLeg(character, targetX, targetY) {
-
-}
-
-function moveRightLeg(character, targetX, targetY) {
-
-}
 
 // Functions to initialize characters
 export function initializeCharacters(numPlayers) {
@@ -86,25 +90,50 @@ export function initializeCharacters(numPlayers) {
   });
 }
 
+let characterContainers = [];
+console.log("characterContainers", characterContainers);
 // Functions to render the character sprites
 export function renderCharacters(characters) {
   characters.forEach(c => {
-    let characterSprites = characterToSprites(c);
-    characterSprites.forEach(s => renderGameObject(s));
+    let container = new PIXI.Container();
+
+    characterToSprites(c).forEach(s => {
+      // renderGameObject(s);
+      container.addChild(s);
+    });
+
+    characterContainers.push(container);
+  });
+
+  characterContainers.forEach(c => renderGameObject(c));
+}
+
+export function updateCharacterSprites(characters) {
+  characterContainers.forEach((container, indx) => {
+    updateBodyPartSprites(container, characters[indx]);
   });
 }
 
+function updateBodyPartSprites(container, character) {
+  container.children.forEach(bodypart => {
+    bodypart.x = character[bodypart.name].x;
+    bodypart.y = character[bodypart.name].y;
+  })
+}
+
+
 function characterToSprites(character) {
-  let bodyParts = Object.keys(character);
+  let bodyParts = ['body', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
 
   return bodyParts.map(bp => {
-    return bodyPartToSprite(character[bp]);
+    return bodyPartToSprite(character[bp], bp);
   }).reverse();
 }
 
-function bodyPartToSprite(part) {
+function bodyPartToSprite(part, partName) {
   let sprite = PIXI.Sprite.fromImage(part.imageSrc);
 
+  sprite.name = partName;
   sprite.height = part.height;
   sprite.width = part.width;
   sprite.x = part.x;

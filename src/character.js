@@ -73,7 +73,7 @@ export function initializeCharacters(numPlayers) {
   });
 }
 
-// Draw Character Sprites
+// Initialize Character Sprites
 export function drawCharacterSprites(characters) {
   let characterParts = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'body'];
 
@@ -101,7 +101,7 @@ function createSprite(part, currentPaw, partName) {
   return sprite;
 }
 
-// Update Character Sprite Rendering
+// Update Character Sprites
 export function moveCharacterSprites(characters) {
   characterContainers.forEach((container, idx) => {
     let character = characters[idx];

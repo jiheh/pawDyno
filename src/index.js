@@ -2,13 +2,15 @@
 
 require('./style.css');
 import {initializeCharacters, drawCharacterSprites, moveCharacterSprites} from './character';
-import {renderWall} from './wall';
+import {drawWall, initializeWall} from './wall';
 
 // Global variables
 export const VIEWPORT_WIDTH = window.innerWidth;
 export const VIEWPORT_HEIGHT = window.innerHeight;
 export const NUM_PLAYERS = 4;
+
 let characters = [];
+let wall = [];
 
 var app = new PIXI.Application({
   width: VIEWPORT_WIDTH,
@@ -20,26 +22,34 @@ document.body.appendChild(app.view);
 
 // Game Setup
 function startGame() {
-  renderWall();
+  wall = initializeWall();
+  drawWall(wall);
 
   characters = initializeCharacters(NUM_PLAYERS);
   drawCharacterSprites(characters);
 
+  // TODO: character movement hardcoded to character 0 for now
+  document.addEventListener('keydown', event => moveCharacter(characters[0], event));
   mainLoop();
 }
 
-// Game Loop
+// Game Loop and Logic
 function mainLoop() {
   moveCharacterSprites(characters);
   requestAnimationFrame(mainLoop);
 }
 
+function moveCharacter(character, event) {
+  let key = event.key;
+  let hold = wall.filter(hold => hold.label === key)[0];
+
+  if (hold) {
+    character.move(hold.x, hold.y);
+  }
+}
+
 // Initialize Game
 startGame();
-characters[0].move(100, 100);
-characters[0].move(100, 150);
-characters[0].move(250, 50);
-characters[0].move(250, 250);
 
 // Helper Functions
 export function renderGameObject(gameObject) {

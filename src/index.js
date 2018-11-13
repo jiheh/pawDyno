@@ -5,10 +5,10 @@ require('./style.css');
 import {initializeCharacters, renderCharacters} from './character';
 import {initializeWall} from './wall';
 
+export const WIDTH = window.innerWidth;
+export const VIEWPORT_HEIGHT = window.innerHeight;
 export const NUM_PLAYERS = 4;
-export const WIDTH = 640;
-export const VIEWPORT_HEIGHT = 480;
-export const GAMEBOARD_HEIGHT = 960;
+export const GAMEBOARD_HEIGHT = VIEWPORT_HEIGHT * 2;
 const START_TOP_YPOS = GAMEBOARD_HEIGHT - VIEWPORT_HEIGHT;
 let top_ypos = START_TOP_YPOS;
 let wall;

@@ -20,10 +20,17 @@ var app = new PIXI.Application({
 
 function renderWall (top_ypos) {
 	for(let hold of wall){
-		let text = new PIXI.Text(hold.label, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
-		text.x = hold.x
-		text.y = hold.y - top_ypos
-		app.stage.addChild(text)
+		hold.text.y = hold.y - top_ypos
+  }
+}
+
+function addHoldsToStage () {
+  for(let hold of wall){
+    let text = new PIXI.Text(hold.label, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+    text.x = hold.x
+    text.y = hold.y - START_TOP_YPOS
+    app.stage.addChild(text)
+    hold.text = text
   }
 }
 
@@ -31,6 +38,7 @@ function renderWall (top_ypos) {
 function startGame() {
   document.body.appendChild(app.view);
   wall = initializeWall();
+  addHoldsToStage();
   mainLoop();
 }
 

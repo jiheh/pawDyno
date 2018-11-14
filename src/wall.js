@@ -1,4 +1,4 @@
-import {WIDTH, GAMEBOARD_HEIGHT, START_TOP_YPOS} from './index';
+import {WIDTH, GAMEBOARD_HEIGHT, START_TOP_YPOS,renderGameObject} from './index';
 let small_words = require('./small_words.json')
 
 const CHARACTER_REACH = 80
@@ -26,7 +26,7 @@ function shuffle(array) {
 
 export class Wall{
 	constructor(){
-		this.top_ypos = START_TOP_YPOS 
+		this.top_ypos = START_TOP_YPOS
 		this.small_words = shuffle(small_words)
 
 		// creating holds
@@ -64,6 +64,12 @@ export class Wall{
 		return shouldDrop
 	}
 
+  draw () {
+    for(let hold of this.holds){
+  		renderGameObject(hold.text)
+  	}
+  }
+
 	render () {
 		for(let hold of this.holds){
 			hold.text.y = hold.y - this.top_ypos
@@ -74,4 +80,3 @@ export class Wall{
 		this.top_ypos -= 10
 	}
 }
-

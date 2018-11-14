@@ -1,14 +1,14 @@
-import {
-  NUM_PLAYERS,
-  VIEWPORT_WIDTH,
-  VIEWPORT_HEIGHT,
-  renderGameObject
-} from './index';
+import { NUM_PLAYERS, WIDTH, VIEWPORT_HEIGHT, renderGameObject } from './index';
+import { GlowFilter } from '@pixi/filter-glow';
 
+// Global variables
 const characterHeight = 110;
 const characterWidth = 52;
 const pawHeight = 20;
 const pawWidth = 20;
+
+// A list of containers for each character. Each container has a body and the four paws as children.
+let characterContainers = [];
 
 class Character {
   constructor(body, leftArm, rightArm, leftLeg, rightLeg) {
@@ -17,23 +17,30 @@ class Character {
     this.rightArm = rightArm;
     this.leftLeg = leftLeg;
     this.rightLeg = rightLeg;
+    this.currentPaw = leftArm;
   }
 
   move(targetX, targetY) {
-    let targetLimb = this.leftArm;
-    if (targetX > (this.body.x + 1/2 * this.body.width)) {
-      targetLimb = this.rightArm;
+    this.currentPaw.x = targetX;
+    this.currentPaw.y = targetY;
+    this.updateBody();
+
+    let nextPaw = this.leftArm;
+    if (this.currentPaw === this.leftArm) {
+      nextPaw = this.rightArm;
+    } else if (this.currentPaw === this.rightArm) {
+      nextPaw = this.leftLeg;
+    } else if (this.currentPaw === this.leftLeg) {
+      nextPaw = this.rightLeg;
     }
 
-    moveBody(this, targetX, targetY);
+    this.currentPaw = nextPaw;
+  }
 
-    if (targetLimb === this.leftArm) {
-      moveLeftLeg(this, targetX, targetY);
-      moveLeftArm(this, targetX, targetY);
-    } else {
-      moveRightLeg(this, targetX, targetY);
-      moveRightArm(this, targetX, targetY);
-    }
+  updateBody() {
+    let paws = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
+    this.body.x = paws.reduce((sumX, paw) => sumX += this[paw].x, 0) / 4;
+    this.body.y = paws.reduce((sumY, paw) => sumY += this[paw].y, 0) / 4;
   }
 }
 
@@ -47,33 +54,13 @@ class CharacterPart {
   }
 }
 
-function moveBody(character, targetX, targetY) {
-
-}
-
-function moveLeftArm(character, targetX, targetY) {
-
-}
-
-function moveRightArm(character, targetX, targetY) {
-
-}
-
-function moveLeftLeg(character, targetX, targetY) {
-
-}
-
-function moveRightLeg(character, targetX, targetY) {
-
-}
-
-// Functions to initialize characters
+// Initialize Character Instances
 export function initializeCharacters(numPlayers) {
   let characters = new Array(numPlayers).fill(null);
 
   // TODO: Better calculations for (x, y) of parts
   return characters.map((_, idx) => {
-    let bodyX = VIEWPORT_WIDTH / NUM_PLAYERS * (idx + 1) * .75 + (characterWidth / 2);
+    let bodyX = WIDTH / NUM_PLAYERS * (idx + 1) * .75 + (characterWidth / 2);
     let bodyY = VIEWPORT_HEIGHT - characterHeight;
 
     let body = new CharacterPart(`images/character${idx}/body.svg`, characterHeight, characterWidth, bodyX, bodyY);
@@ -86,29 +73,43 @@ export function initializeCharacters(numPlayers) {
   });
 }
 
-// Functions to render the character sprites
-export function renderCharacters(characters) {
-  characters.forEach(c => {
-    let characterSprites = characterToSprites(c);
-    characterSprites.forEach(s => renderGameObject(s));
+// Initialize Character Sprites
+export function drawCharacterSprites(characters) {
+  let characterParts = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'body'];
+
+  characters.forEach(character => {
+    let container = new PIXI.Container();
+
+    characterParts
+      .map(partName => createSprite(character[partName], character.currentPaw, partName))
+      .forEach(sprite => container.addChild(sprite));
+
+    characterContainers.push(container);
   });
+
+  characterContainers.forEach(c => renderGameObject(c));
 }
 
-function characterToSprites(character) {
-  let bodyParts = Object.keys(character);
-
-  return bodyParts.map(bp => {
-    return bodyPartToSprite(character[bp]);
-  }).reverse();
-}
-
-function bodyPartToSprite(part) {
+function createSprite(part, currentPaw, partName) {
   let sprite = PIXI.Sprite.fromImage(part.imageSrc);
-
+  sprite.name = partName;
   sprite.height = part.height;
   sprite.width = part.width;
   sprite.x = part.x;
   sprite.y = part.y;
 
   return sprite;
+}
+
+// Update Character Sprites
+export function moveCharacterSprites(characters) {
+  characterContainers.forEach((container, idx) => {
+    let character = characters[idx];
+
+    container.children.forEach(partSprite => {
+      partSprite.x = character[partSprite.name].x;
+      partSprite.y = character[partSprite.name].y;
+      partSprite.filters = character[partSprite.name] === character.currentPaw ? [ new GlowFilter(2, 2, 0, 0xFFFFFF, .1) ] : [];
+    });
+  });
 }

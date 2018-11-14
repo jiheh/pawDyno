@@ -28,9 +28,11 @@
   },
   "homepage": "https://github.com/jiheh/pawDyno#readme",
   "dependencies": {
+    "@pixi/filter-glow": "^2.5.0",
     "css-loader": "^1.0.1",
     "express": "^4.16.4",
     "socket.io": "^2.1.1",
+    "pixi.js": "^4.8.2",
     "style-loader": "^0.23.1",
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2"

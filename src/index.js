@@ -2,40 +2,49 @@
 
 require('./style.css');
 import {initializeCharacters, drawCharacterSprites, moveCharacterSprites} from './character';
-import {drawWall, initializeWall} from './wall';
+import {Wall} from './wall';
 
 // Global variables
-export const VIEWPORT_WIDTH = window.innerWidth;
+export const WIDTH = window.innerWidth;
 export const VIEWPORT_HEIGHT = window.innerHeight;
 export const NUM_PLAYERS = 4;
+export const GAMEBOARD_HEIGHT = VIEWPORT_HEIGHT * 2;
+export const START_TOP_YPOS = GAMEBOARD_HEIGHT - VIEWPORT_HEIGHT;
+let top_ypos = START_TOP_YPOS;
 
+let wall;
 let characters = [];
-let wall = [];
 
 var app = new PIXI.Application({
-  width: VIEWPORT_WIDTH,
+  width: WIDTH,
   height: VIEWPORT_HEIGHT,
   backgroundColor: 0x555555
 });
 document.body.appendChild(app.view);
 
-
 // Game Setup
 function startGame() {
-  wall = initializeWall();
-  drawWall(wall);
+  // TODO: character movement hardcoded to character 0 and only looking for one letter label
+  document.addEventListener('keydown', event => moveCharacter(characters[0], event));
+
+  wall = new Wall();
+  wall.draw();
 
   characters = initializeCharacters(NUM_PLAYERS);
   drawCharacterSprites(characters);
 
-  // TODO: character movement hardcoded to character 0 for now
-  document.addEventListener('keydown', event => moveCharacter(characters[0], event));
   mainLoop();
 }
 
 // Game Loop and Logic
 function mainLoop() {
+  if(wall.top_ypos > 0) {
+    wall.shift()
+  }
+
+  wall.render();
   moveCharacterSprites(characters);
+
   requestAnimationFrame(mainLoop);
 }
 

@@ -11,30 +11,24 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
 let players = [];
+let sockets = [];
 
-function startJoinTimer() {
-  
-};
 
 io.on('connection', function (socket) {
-	// socket.emit('id', `socket id: ${socket.id}`);
+  sockets.push(socket);
+
+  // Start timer and game
   if(players.length === 0) {
-    startJoinTimer();
+    setTimeout(() => socket.broadcast.emit('start game'), 20000);
   }
-  players.push(createNewCharacter());
 
-  console.log("server id", socket.id);
-  console.log("popcorn")
-  console.log(players);
+  players.push({id: socket.id, character: createNewCharacter()});
+  socket.emit('player count', players.length);
+
+  socket.on('disconnect', () => {
+    players = players.filter(p => p.id !== socket.id)
+  });
 });
-
-
-
-  // io.emit('broadcast', /* */);
-  //
-  //
-  // socket.emit('something', 'something else');
-  // socket.emit('news', { hello: 'world' });
 
 app.get('/', (_, res) => res.sendFile(resolve(__dirname, '..', 'public', 'index.html')));
 app.set('port', port);

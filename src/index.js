@@ -25,9 +25,12 @@ document.body.appendChild(app.view);
 // Socket
 var socket = io.connect('http://localhost:3000');
 socket.on('connect', function(){
-  socket.emit('player joined', socket.id);
+  console.log(socket.id);
 
 	console.log('hello!');
+});
+socket.on('player count', function(data){
+  console.log(`you are player ${data}`);
 });
 // socket.on('something', function (data) {
 // 	console.log(data)

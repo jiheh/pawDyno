@@ -41,14 +41,4 @@ class CharacterPart {
   }
 }
 
-function createNewCharacter() {
-  part = new CharacterPart(0,0,0,0);
-  return new Character(
-    Object.assign(part),
-    Object.assign(part),
-    Object.assign(part),
-    Object.assign(part),
-    Object.assign(part))
-}
-
-module.exports = {createNewCharacter};
+module.exports = {Character};

@@ -1,4 +1,4 @@
-import { NUM_PLAYERS, WIDTH, VIEWPORT_HEIGHT, renderGameObject } from './index';
+import { WIDTH, VIEWPORT_HEIGHT, renderGameObject } from './index';
 import { GlowFilter } from '@pixi/filter-glow';
 
 // Global variables
@@ -60,7 +60,7 @@ export function initializeCharacters(numPlayers) {
 
   // TODO: Better calculations for (x, y) of parts
   return characters.map((_, idx) => {
-    let bodyX = WIDTH / NUM_PLAYERS * (idx + 1) * .75 + (characterWidth / 2);
+    let bodyX = WIDTH / numPlayers * (idx + 1) * .75 + (characterWidth / 2);
     let bodyY = VIEWPORT_HEIGHT - characterHeight;
 
     let body = new CharacterPart(`images/character${idx}/body.svg`, characterHeight, characterWidth, bodyX, bodyY);

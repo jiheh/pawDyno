@@ -7,7 +7,6 @@ import {Wall} from './wall';
 // Global variables
 export const WIDTH = window.innerWidth;
 export const VIEWPORT_HEIGHT = window.innerHeight;
-export const NUM_PLAYERS = 4;
 export const GAMEBOARD_HEIGHT = VIEWPORT_HEIGHT * 2;
 export const START_TOP_YPOS = GAMEBOARD_HEIGHT - VIEWPORT_HEIGHT;
 let top_ypos = START_TOP_YPOS;
@@ -24,26 +23,31 @@ document.body.appendChild(app.view);
 
 // Socket
 var socket = io.connect('http://localhost:3000');
+
 socket.on('connect', function(){
-	console.log('hello!');
-})
-socket.on('something', function (data) {
-	console.log(data)
-})
-socket.on('news', function (data) {
-	console.log(data);
-	socket.emit('my other event', { my: 'data' });
+  console.log(socket.id);
 });
 
+socket.on('player count', function(data){
+  console.log(`you are player ${data}`);
+});
+
+socket.on('start game', data => startGame(data.numPlayers));
+
+// socket.on('news', function (data) {
+// 	console.log(data);
+// 	socket.emit('my other event', { my: 'data' });
+// });
+
 // Game Setup
-function startGame() {
+function startGame(numPlayers) {
   // TODO: character movement hardcoded to character 0 and only looking for one letter label
   document.addEventListener('keydown', event => moveCharacter(characters[0], event));
 
   wall = new Wall();
   wall.draw();
 
-  characters = initializeCharacters(NUM_PLAYERS);
+  characters = initializeCharacters(numPlayers);
   drawCharacterSprites(characters);
 
   mainLoop();
@@ -69,9 +73,6 @@ function moveCharacter(character, event) {
     character.move(hold.x, hold.y);
   }
 }
-
-// Initialize Game
-startGame();
 
 // Helper Functions
 export function renderGameObject(gameObject) {

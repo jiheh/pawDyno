@@ -21,7 +21,7 @@ let players = new Players();
 players.draw();
 
 // Socket
-let socket = io.connect('http://localhost:3000');
+let socket = io.connect();
 
 socket.on('player joined', data => {
   players.addPlayers(data.players);
@@ -69,12 +69,19 @@ function mainLoop() {
 // Helper Functions
 
 function handleKeydown(event){
-	if(event.keyCode === 13){
-		socket.emit('movePaw', holdInput)
+	if(event.keyCode === 13){ // enter
+		if(wall.holds[holdInput]){
+			socket.emit('movePaw', holdInput)
+		}
 		holdInput = ''
-	}else{
+	}else if(event.keyCode === 8){ // backspace
+		if(holdInput.length > 0){
+			holdInput = holdInput.slice(0, -1)
+		}
+	}else if(event.key.length === 1){
 		holdInput += event.key;
 	}
+	console.log(holdInput)
 }
 
 export function renderGameObject(gameObject) {

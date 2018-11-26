@@ -4,7 +4,7 @@ const Player = require('./player');
 class Game {
   constructor() {
     this.FPS = 30;
-    this.LOBBY_TIMER = 1000;
+    this.LOBBY_TIMER = 3000;
     this.BOARD_HEIGHT_PERCENT = 3;
 
     this.viewHeightPercent = 1;
@@ -16,8 +16,10 @@ class Game {
 
 	movePlayer(holdInput, socket){
 		let hold = this.wall.holds[holdInput]
-		let player = this.players[socket.id]
-		player.movePaw(hold.x, hold.y)
+		if(hold){
+			let player = this.players[socket.id]
+			player.movePaw(hold.x, hold.y)
+		}
 	}
 
   createPlayer(io, socket) {

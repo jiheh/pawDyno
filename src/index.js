@@ -1,78 +1,78 @@
 'use strict';
 
 require('./style.css');
-import {initializeCharacters, drawCharacterSprites, moveCharacterSprites} from './character';
-import {Wall} from './wall';
+import {Players, Player} from './player';
+import Wall from './wall';
 
 // Global variables
-export const WIDTH = window.innerWidth;
 export const VIEWPORT_HEIGHT = window.innerHeight;
-export const GAMEBOARD_HEIGHT = VIEWPORT_HEIGHT * 2;
-export const START_TOP_YPOS = GAMEBOARD_HEIGHT - VIEWPORT_HEIGHT;
-let top_ypos = START_TOP_YPOS;
-
-let wall;
-let characters = [];
+export const VIEWPORT_WIDTH = window.innerWidth;
 
 var app = new PIXI.Application({
-  width: WIDTH,
+  width: VIEWPORT_WIDTH,
   height: VIEWPORT_HEIGHT,
   backgroundColor: 0x555555
 });
 document.body.appendChild(app.view);
 
+let wall = {};
+let players = new Players();
+players.draw();
+
 // Socket
 var socket = io.connect('http://localhost:3000');
 
-socket.on('connect', function(){
-  console.log(socket.id);
+socket.on('player joined', data => {
+  players.addPlayers(data.players);
+});
+socket.on('player disconnected', data => {
+  console.log(data.players)
+  players.removePlayers(data.players);
 });
 
-socket.on('player count', function(data){
-  console.log(`you are player ${data}`);
+socket.on('start game', data => {
+  startGame(data.wall);
 });
 
-socket.on('start game', data => startGame(data.numPlayers));
-
-// socket.on('news', function (data) {
-// 	console.log(data);
-// 	socket.emit('my other event', { my: 'data' });
-// });
+socket.on('game state', data => {
+  players.updatePlayers(data.players);
+});
 
 // Game Setup
-function startGame(numPlayers) {
+function startGame(wallData) {
   // TODO: character movement hardcoded to character 0 and only looking for one letter label
-  document.addEventListener('keydown', event => moveCharacter(characters[0], event));
-
-  wall = new Wall();
+  // document.addEventListener('keydown', event => moveCharacter(characters[0], event));
+  wall = new Wall(wallData);
   wall.draw();
 
-  characters = initializeCharacters(numPlayers);
-  drawCharacterSprites(characters);
+  // renderPlayerSprites(players);
+
+  // characters = initializeCharacters(numPlayers);
+  // drawCharacterSprites(characters);
 
   mainLoop();
 }
 
 // Game Loop and Logic
 function mainLoop() {
-  if(wall.top_ypos > 0) {
-    wall.shift()
+  if (wall.y < 0) {
+    wall.y += 10;
   }
 
-  wall.render();
-  moveCharacterSprites(characters);
+  // wall.render();
+  // moveCharacterSprites(players);
 
   requestAnimationFrame(mainLoop);
 }
 
-function moveCharacter(character, event) {
-  let key = event.key;
-  let hold = wall.filter(hold => hold.label === key)[0];
-
-  if (hold) {
-    character.move(hold.x, hold.y);
-  }
-}
+// function moveCharacter(character, event) {
+//   let key = event.key;
+//   let hold = wall.filter(hold => hold.label === key)[0];
+//
+//   if (hold) {
+//     character.move(hold.x, hold.y);
+//   }
+// }
 
 // Helper Functions
 export function renderGameObject(gameObject) {

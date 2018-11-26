@@ -18,6 +18,7 @@ io.on('connection', function (socket) {
   game.createPlayer(io, socket);
 
   socket.on('disconnect', () => game.removePlayer(io, socket));
+	socket.on('movePaw', (holdInput) => game.movePlayer(holdInput, socket))
 });
 
 //Server

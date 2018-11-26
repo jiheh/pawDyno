@@ -15,12 +15,13 @@ var app = new PIXI.Application({
 });
 document.body.appendChild(app.view);
 
+let holdInput = ''
 let wall = {};
 let players = new Players();
 players.draw();
 
 // Socket
-var socket = io.connect('http://localhost:3000');
+let socket = io.connect('http://localhost:3000');
 
 socket.on('player joined', data => {
   players.addPlayers(data.players);
@@ -41,14 +42,9 @@ socket.on('game state', data => {
 // Game Setup
 function startGame(wallData) {
   // TODO: character movement hardcoded to character 0 and only looking for one letter label
-  // document.addEventListener('keydown', event => moveCharacter(characters[0], event));
+  document.addEventListener('keydown', event => handleKeydown(event));
   wall = new Wall(wallData);
   wall.draw();
-
-  // renderPlayerSprites(players);
-
-  // characters = initializeCharacters(numPlayers);
-  // drawCharacterSprites(characters);
 
   mainLoop();
 }
@@ -58,10 +54,6 @@ function mainLoop() {
   if (wall.y < 0) {
     wall.y += 10;
   }
-
-  // wall.render();
-  // moveCharacterSprites(players);
-
   requestAnimationFrame(mainLoop);
 }
 
@@ -75,6 +67,16 @@ function mainLoop() {
 // }
 
 // Helper Functions
+
+function handleKeydown(event){
+	if(event.keyCode === 13){
+		socket.emit('movePaw', holdInput)
+		holdInput = ''
+	}else{
+		holdInput += event.key;
+	}
+}
+
 export function renderGameObject(gameObject) {
   app.stage.addChild(gameObject);
 }

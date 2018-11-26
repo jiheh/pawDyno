@@ -8,7 +8,7 @@ class Wall {
 	constructor(boardHeightPercent, viewHeightPercent, viewWidthPercent) {
 		this.heightPercent = viewHeightPercent * boardHeightPercent;
 		this.yPosition = (viewHeightPercent / boardHeightPercent) - viewHeightPercent; // Max == 0
-		this.holds = [];
+		this.holds = {};
 
 		this.createHolds(viewWidthPercent);
 	}
@@ -29,7 +29,7 @@ class Wall {
             label: shuffledLabels[x * numHoldsY + y]
           };
 
-          this.holds.push(hold);
+          this.holds[hold.label] = hold;
         }
       }
     }

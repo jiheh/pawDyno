@@ -22,7 +22,7 @@ export class Players extends PIXI.Container {
         this.players[playerId] = player;
         this.addChild(new Player(playerId, player));
       } else {
-        updatePlayer(playerId, newPlayersObj[playerId]);
+        this.updatePlayer(playerId, newPlayersObj[playerId]);
       }
     });
   }
@@ -37,14 +37,14 @@ export class Players extends PIXI.Container {
         let oldContainer = this.children.find(c => c.id === playerId);
         this.removeChild(oldContainer);
       } else {
-        updatePlayer(playerId, newPlayersObj[playerId]);
+        this.updatePlayer(playerId, newPlayersObj[playerId]);
       }
     });
   }
 
   updatePlayers(newPlayersObj) {
     let playerIds = Object.keys(newPlayersObj);
-    playerIds.forEach(playerId => updatePlayer(playerId, newPlayersObj[playerId]));
+    playerIds.forEach(playerId => this.updatePlayer(playerId, newPlayersObj[playerId]));
   }
 
   updatePlayer(playerId, player) {
@@ -56,9 +56,9 @@ export class Players extends PIXI.Container {
       sprites[sprite.name] = sprite;
     });
 
-    player.setStartPosition(sprites[player.body.name], player.body);
+    playerContainer.setSpritePosition(sprites[player.body.name], player.body);
     player.paws.forEach(paw => {
-      player.setStartPosition(sprites[paw.name], paw);
+      playerContainer.setSpritePosition(sprites[paw.name], paw);
     })
   }
 

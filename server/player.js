@@ -17,7 +17,7 @@ class Player {
 
   movePaw(targetX, targetY) {
     // Update paw
-    let currentPaws = this.paws[this.currentPawIdx];
+    let currentPaw = this.paws[this.currentPawIdx];
     currentPaw.x = targetX;
     currentPaw.y = targetY;
 

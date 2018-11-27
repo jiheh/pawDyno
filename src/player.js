@@ -67,29 +67,25 @@ export class Player extends PIXI.Container {
 
   calcDefaultX(sprite) {
     let bodyX = this.body.x * VIEWPORT_WIDTH;
+    let spriteX = bodyX;
 
-    if (sprite.name === 'leftArm') {
-      return bodyX - PLAYER_SPRITE_WIDTH / 4.25;
-    } else if (sprite.name === 'rightArm') {
-      return bodyX + PLAYER_SPRITE_WIDTH * .9;
-    } else if (sprite.name === 'leftLeg') {
-      return bodyX - PLAYER_SPRITE_WIDTH / 4.25;
-    } else if (sprite.name === 'rightLeg') {
-      return bodyX + PLAYER_SPRITE_WIDTH * .9;
-    }
+    if (sprite.name === 'leftArm') spriteX = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
+    else if (sprite.name === 'rightArm') spriteX = bodyX + PLAYER_SPRITE_WIDTH * .9;
+    else if (sprite.name === 'leftLeg') spriteX = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
+    else if (sprite.name === 'rightLeg') spriteX = bodyX + PLAYER_SPRITE_WIDTH * .9;
+
+    return spriteX;
   }
 
   calcDefaultY(sprite) {
     let bodyY = this.body.y * VIEWPORT_HEIGHT;
+    let spriteY = bodyY;
 
-    if (sprite.name === 'leftArm') {
-      return bodyY + PLAYER_SPRITE_HEIGHT / 4;
-    } else if (sprite.name === 'rightArm') {
-      return bodyY + PLAYER_SPRITE_HEIGHT / 4;
-    } else if (sprite.name === 'leftLeg') {
-      return bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
-    } else if (sprite.name === 'rightLeg') {
-      return bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
-    }
+    if (sprite.name === 'leftArm') spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 4;
+    else if (sprite.name === 'rightArm') spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 4;
+    else if (sprite.name === 'leftLeg') spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
+    else if (sprite.name === 'rightLeg') spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
+
+    return spriteY;
   }
 }

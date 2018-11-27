@@ -22,8 +22,8 @@ class Player {
     currentPaw.y = targetY;
 
     // Update body
-    this.body.x = this.paws.reduce((sumX, paw) => sumX += paw.x, 0) / 4;
-    this.body.y = this.paws.reduce((sumY, paw) => sumY += paw.y, 0) / 4;
+    this.body.x = this.paws.reduce((sumX, paw) => sumX += paw.x ? paw.x : this.body.x, 0) / 4;
+    this.body.y = this.paws.reduce((sumY, paw) => sumY += paw.y ? paw.y : this.body.y, 0) / 4;
 
     // Update currentPawIdx
     this.currentPawIdx =

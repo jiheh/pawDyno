@@ -15,19 +15,26 @@ class Player {
     this.body.y = heightPercent - .2;
   }
 
-  movePaw(targetX, targetY) {
+  movePaw(newHold) {
     // Update paw
-    let currentPaw = this.paws[this.currentPawIdx];
-    currentPaw.x = targetX;
-    currentPaw.y = targetY;
+    if (!newHold.inUse) {
+      let currentPaw = this.paws[this.currentPawIdx];
 
-    // Update body
-    this.body.x = this.paws.reduce((sumX, paw) => sumX += paw.x ? paw.x : this.body.x, 0) / 4;
-    this.body.y = this.paws.reduce((sumY, paw) => sumY += paw.y ? paw.y : this.body.y, 0) / 4;
+      if (currentPaw.hold) currentPaw.hold.inUse = false;
+      currentPaw.hold = newHold;
+      newHold.inUse = true;
 
-    // Update currentPawIdx
-    this.currentPawIdx =
-      this.currentPawIdx === 3 ? 0 : this.currentPawIdx + 1;
+      currentPaw.x = newHold.x;
+      currentPaw.y = newHold.y;
+
+      // Update body
+      this.body.x = this.paws.reduce((sumX, paw) => sumX += paw.x ? paw.x : this.body.x, 0) / 4;
+      this.body.y = this.paws.reduce((sumY, paw) => sumY += paw.y ? paw.y : this.body.y, 0) / 4;
+
+      // Update currentPawIdx
+      this.currentPawIdx =
+        this.currentPawIdx === 3 ? 0 : this.currentPawIdx + 1;
+    }
   }
 }
 
@@ -36,6 +43,7 @@ class PlayerPart {
     this.name = name;
     this.x = null;
     this.y = null;
+    this.hold = null;
   }
 }
 

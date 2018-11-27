@@ -1,48 +1,41 @@
 'use strict';
 
 import './style.css';
-import Trianglify from 'trianglify';
-import {Players, Player} from './player';
+import Game from './game';
 import Wall from './wall';
 
 // Global Variables
 export const VIEWPORT_HEIGHT = window.innerHeight;
 export const VIEWPORT_WIDTH = window.innerWidth;
 
-var app = new PIXI.Application(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-document.body.appendChild(app.view);
-generateBackground();
-
+let game;
 let holdInput = '';
-let wall = {};
-let players = new Players();
-players.draw();
 
 // Socket
 let socket = io.connect();
 
-socket.on('wall setup', data => setupContainers(data));
-socket.on('player setup', data => setupPlayers(data));
+socket.on('env setup', data => setupEnvironment(data));
+socket.on('players setup', data => setupPlayers(data));
 socket.on('game start', data => startGame(data));
 socket.on('game state', data => mainLoop(data));
 
 // Game Logic
-function setupContainers(data) {
-  wall = new Wall(data.wall);
-  players.updateContainer(wall.height, wall.y);
+function setupEnvironment(data) {
+  game = new Game(data.heightPercent, data.yPosPercent);
+  document.body.appendChild(game.view);
 }
 
 function setupPlayers(data) {
-  players.updatePlayers(data.players);
+  game.updatePlayers(data.players);
 }
 
 function startGame(data) {
-  wall.draw();
+  game.createWall(data.wall);
   document.addEventListener('keydown', event => handleKeydown(event));
 }
 
 function mainLoop(data) {
-  players.updatePlayers(data.players);
+  game.updatePlayers(data.players);
 }
 
 // Helper Functions
@@ -62,22 +55,5 @@ function handleKeydown(event){
 }
 
 export function renderGameObject(gameObject) {
-  app.stage.addChild(gameObject);
-}
-
-function generateBackground() {
-  let pattern = Trianglify({
-    height: VIEWPORT_HEIGHT,
-    width: VIEWPORT_WIDTH,
-    cell_size: 100,
-    x_colors: 'Greys'
-  });
-  
-  let texture = PIXI.Texture.fromCanvas(pattern.canvas());
-
-  let mesh = new PIXI.mesh.Mesh(texture);
-  mesh.height = VIEWPORT_HEIGHT;
-  mesh.width = VIEWPORT_WIDTH;
-
-  renderGameObject(mesh);
+  game.stage.addChild(gameObject);
 }

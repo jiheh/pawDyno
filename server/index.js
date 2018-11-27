@@ -5,10 +5,10 @@ const { resolve } = require('path');
 const Game = require('./game');
 
 const app = new Express();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 
-// Global variables
+// Global Variables
 let game = new Game();
 
 // Socket
@@ -20,7 +20,7 @@ io.on('connection', function (socket) {
 	socket.on('movePaw', (holdInput) => game.movePlayer(holdInput, socket));
 });
 
-//Server
+// Server
 let port = process.env.PORT || 3000;
 
 app.get('/', (_, res) => res.sendFile(resolve(__dirname, '..', 'public', 'index.html')));

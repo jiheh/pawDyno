@@ -1,24 +1,18 @@
-// All measurements are in decimals and represent the % from the top of the
-// screen (Y) or from the left of the screen (X)
-
 let labels = require('./small_words.json');
 let shuffledLabels = shuffle(labels);
 
 class Wall {
-	constructor(boardHeightPercent, viewHeightPercent, viewWidthPercent) {
-		this.heightPercent = viewHeightPercent * boardHeightPercent;
-		this.yPosition = (viewHeightPercent / boardHeightPercent) - viewHeightPercent; // Max == 0
+	constructor(heightPercent, widthPercent) {
 		this.holds = {};
-
-		this.createHolds(viewWidthPercent);
+		this.createHolds(heightPercent, widthPercent);
 	}
 
-  createHolds(viewWidthPercent) {
+  createHolds(heightPercent, widthPercent) {
 		const PLAYER_REACH = .1;
 		const WIGGLE = .05;
 
-		let numHoldsY = this.heightPercent / PLAYER_REACH;
-    let numHoldsX = viewWidthPercent / PLAYER_REACH;
+		let numHoldsY = heightPercent / PLAYER_REACH;
+    let numHoldsX = widthPercent / PLAYER_REACH;
 
     for (let x = 0; x < numHoldsX; x++) {
       for (let y = 0; y < numHoldsY; y++) {

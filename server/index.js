@@ -18,7 +18,8 @@ io.on('connection', function (socket) {
 
   socket.on('disconnect', () => game.removePlayer(io, socket));
 	socket.on('movePaw', (holdInput) => game.movePlayer(holdInput, socket));
-	socket.on('player lost', () => game.endPlayer(socket.id))
+	socket.on('player lost', () => game.sendLoser(socket))
+	socket.on('game finished', () => game.sendWinner(socket))
 });
 
 // Server

@@ -18,6 +18,8 @@ socket.on('env setup', data => setupEnvironment(data));
 socket.on('players setup', data => setupPlayers(data));
 socket.on('game start', data => startGame(data));
 socket.on('game state', data => mainLoop(data));
+socket.on('you lost', () => game.gameOver('lose'));
+socket.on('you won', () => game.gameOver('win'));
 
 // Game Logic
 function setupEnvironment(data) {
@@ -36,7 +38,7 @@ function startGame(data) {
 
 function mainLoop(data) {
   game.updatePlayers(data.players);
-	game.updateYPos();
+	game.updateYPos(socket);
 	game.checkPlayerStatus(socket)
 }
 

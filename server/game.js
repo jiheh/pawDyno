@@ -73,8 +73,16 @@ class Game {
     }
   }
 
-	endPlayer(socketId){
-		this.players[socketId].isAlive = false;
+	sendLoser(socket){
+		this.players[socket.id].isAlive = false;
+		socket.emit('you lost')
+	}
+
+	// Game End
+	sendWinner(socket){
+		if(this.players[socket.id].isAlive){
+			socket.emit('you won')
+		}
 	}
 }
 

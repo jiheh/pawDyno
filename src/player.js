@@ -41,6 +41,7 @@ export class Player extends PIXI.Container {
     this.body = data.body;
     this.paws = data.paws;
     this.currentPawIdx = data.currentPawIdx;
+		this.topPawY;
 
     this.createPlayerSprites();
   }
@@ -62,6 +63,10 @@ export class Player extends PIXI.Container {
     sprite.x = part.x ? (part.x * VIEWPORT_WIDTH) : this.calcDefaultX(sprite);
     sprite.y = part.y ? (part.y * VIEWPORT_HEIGHT) : this.calcDefaultY(sprite);
 
+
+		if(!this.topPawY || sprite.y < this.topPawY){
+			this.topPawY = sprite.y;
+		}
     this.addChild(sprite);
   }
 

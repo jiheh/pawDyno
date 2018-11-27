@@ -61,25 +61,20 @@ export default class Game extends PIXI.Application {
     this.stage.addChild(child);
   }
 
-  updateYPos() {
+  updateYPos(socket) {
     if (this.yPos <= 0) {
-      this.yPos += this.yPosDelta
-			this.yPosDelta *= 1.001
+			this.yPos += this.yPosDelta
+			this.yPosDelta *= 1.002
       this.stage.children.forEach(child => child.y = this.yPos);
-    }
+    }else{
+			socket.emit('game finished')
+		}
   }
 
 	checkPlayerStatus(socket) {
-		for(let player of this.players.children){
-			let inView = false
-			for(let playerPart of player.children){
-				if(playerPart.y < -this.yPos + VIEWPORT_HEIGHT){
-					inView = true
-				}
-			}
-			if(!inView){
-				socket.emit('player lost')
-			}
+		let player = this.players.children.find(c => c.id == socket.id);
+		if(player.topPawY > -this.yPos + VIEWPORT_HEIGHT){
+			socket.emit('player lost')
 		}
 	}
 
@@ -95,6 +90,15 @@ export default class Game extends PIXI.Application {
 			}
 		} else if (event.key.length === 1){
 			this.holdInput += event.key;
+		}
+	}
+
+	gameOver(type){
+		console.log(type)
+		if(type === 'lose'){
+			console.log('you lost')
+		}else if(type === 'win'){
+			console.log('you won')
 		}
 	}
 }

@@ -7,8 +7,10 @@ export default class Game extends PIXI.Application {
   constructor(heightPercent, yPosPercent) {
     super(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
-    this.boardHeight = 3 * VIEWPORT_HEIGHT;
-    this.yPos = -.66 * 3 * VIEWPORT_HEIGHT; // Max 0
+    this.boardHeight = heightPercent * VIEWPORT_HEIGHT;
+    this.yPos = heightPercent * yPosPercent * VIEWPORT_HEIGHT; // Max 0
+		this.yPosDelta = 1
+		this.holdInput = ''
 
     this.createBackground();
     this.createPlayers();
@@ -59,10 +61,26 @@ export default class Game extends PIXI.Application {
     this.stage.addChild(child);
   }
 
-  updateYPos(targetY) {
-    if (targetY <= 0) {
-      this.yPos = targetY;
-      this.children.forEach(child => child.y = targetY);
+  updateYPos() {
+    if (this.yPos <= 0) {
+      this.yPos += this.yPosDelta
+			this.yPosDelta *= 1.001
+      this.stage.children.forEach(child => child.y = this.yPos);
     }
   }
+
+	handleKeydown(event, socket){
+		if (event.keyCode === 13) { // enter
+			if (this.wall.holds[this.holdInput]) {
+				socket.emit('movePaw', this.holdInput);
+			}
+			this.holdInput = '';
+		} else if (event.keyCode === 8){ // backspace
+			if (this.holdInput.length > 0) {
+				this.holdInput = this.holdInput.slice(0, -1);
+			}
+		} else if (event.key.length === 1){
+			this.holdInput += event.key;
+		}
+	}
 }

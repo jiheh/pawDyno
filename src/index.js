@@ -31,29 +31,15 @@ function setupPlayers(data) {
 
 function startGame(data) {
   game.createWall(data.wall);
-  document.addEventListener('keydown', event => handleKeydown(event));
+  document.addEventListener('keydown', event => game.handleKeydown(event, socket));
 }
 
 function mainLoop(data) {
   game.updatePlayers(data.players);
+	game.updateYPos();
 }
 
 // Helper Functions
-function handleKeydown(event){
-	if (event.keyCode === 13) { // enter
-		if (wall.holds[holdInput]) {
-			socket.emit('movePaw', holdInput);
-		}
-		holdInput = '';
-	} else if (event.keyCode === 8){ // backspace
-		if (holdInput.length > 0) {
-			holdInput = holdInput.slice(0, -1);
-		}
-	} else if (event.key.length === 1){
-		holdInput += event.key;
-	}
-}
-
 export function renderGameObject(gameObject) {
   game.stage.addChild(gameObject);
 }

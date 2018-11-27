@@ -69,7 +69,7 @@ class Game {
     let hold = this.wall.holds[holdInput];
     if (hold) {
       let player = this.players[socket.id];
-      player.movePaw(hold.x, hold.y);
+      player.movePaw(hold);
     }
   }
 }

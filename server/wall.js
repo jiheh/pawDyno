@@ -20,7 +20,8 @@ class Wall {
 					let hold = {
             x: (x * PLAYER_REACH) + (Math.random() * WIGGLE),
             y: (y * PLAYER_REACH) + (Math.random() * WIGGLE),
-            label: shuffledLabels[x * numHoldsY + y]
+            label: shuffledLabels[x * numHoldsY + y],
+						inUse: false
           };
 
           this.holds[hold.label] = hold;

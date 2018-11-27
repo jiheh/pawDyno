@@ -14,21 +14,21 @@ class Game {
     this.players = {};
   }
 
-  // Game Setup Logic
+  // Player Setup
   setupPlayer(io, socket) {
     // Send wall to new client
     socket.emit('wall setup', {wall: this.wall});
 
     this.players[socket.id] = new Player();
-    this.setPlayerStartPositions(io);
+    this.setPlayerStartPos(io);
   }
 
   removePlayer(io, socket) {
     delete this.players[socket.id];
-    this.setPlayerStartPositions(io);
+    this.setPlayerStartPos(io);
   }
 
-  setPlayerStartPositions(io) {
+  setPlayerStartPos(io) {
     let playerIds = Object.keys(this.players);
 
     playerIds.forEach((playerId, idx) => {
@@ -39,6 +39,7 @@ class Game {
     io.emit('player setup', {players: this.players});
   }
 
+  // Game Setup
   createLobby(io) {
     setTimeout(() => this.start(io), this.LOBBY_TIMER);
   }
@@ -48,7 +49,7 @@ class Game {
     this.broadcastState(io);
   }
 
-  // Game Update Logic
+  // Game Update
   broadcastState(io) {
     let gameState = {
       yPosition: this.wall.yPosition,

@@ -59,44 +59,37 @@ export class Player extends PIXI.Container {
     sprite.name = part.name;
     sprite.height = height;
     sprite.width = width;
-    this.setSpritePosition(sprite, part);
+    sprite.x = part.x ? (part.x * VIEWPORT_WIDTH) : this.calcDefaultX(sprite);
+    sprite.y = part.y ? (part.y * VIEWPORT_HEIGHT) : this.calcDefaultY(sprite);
 
     this.addChild(sprite);
   }
 
-  setSpritePosition(sprite, part) {
-    if (part.x) sprite.x = part.x * VIEWPORT_WIDTH;
-    else this.setDefaultPositionX(sprite);
-
-    if (part.y) sprite.y = part.y * VIEWPORT_HEIGHT;
-    else this.setDefaultPositionY(sprite);
-  }
-
-  setDefaultPositionX(sprite) {
+  calcDefaultX(sprite) {
     let bodyX = this.body.x * VIEWPORT_WIDTH;
 
     if (sprite.name === 'leftArm') {
-      sprite.x = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
+      return bodyX - PLAYER_SPRITE_WIDTH / 4.25;
     } else if (sprite.name === 'rightArm') {
-      sprite.x = bodyX + PLAYER_SPRITE_WIDTH * .9;
+      return bodyX + PLAYER_SPRITE_WIDTH * .9;
     } else if (sprite.name === 'leftLeg') {
-      sprite.x = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
+      return bodyX - PLAYER_SPRITE_WIDTH / 4.25;
     } else if (sprite.name === 'rightLeg') {
-      sprite.x = bodyX + PLAYER_SPRITE_WIDTH * .9;
+      return bodyX + PLAYER_SPRITE_WIDTH * .9;
     }
   }
 
-  setDefaultPositionY(sprite) {
+  calcDefaultY(sprite) {
     let bodyY = this.body.y * VIEWPORT_HEIGHT;
 
     if (sprite.name === 'leftArm') {
-      sprite.y = bodyY + PLAYER_SPRITE_HEIGHT / 4;
+      return bodyY + PLAYER_SPRITE_HEIGHT / 4;
     } else if (sprite.name === 'rightArm') {
-      sprite.y = bodyY + PLAYER_SPRITE_HEIGHT / 4;
+      return bodyY + PLAYER_SPRITE_HEIGHT / 4;
     } else if (sprite.name === 'leftLeg') {
-      sprite.y = bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
+      return bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
     } else if (sprite.name === 'rightLeg') {
-      sprite.y = bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
+      return bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
     }
   }
 }

@@ -10,9 +10,9 @@ class Player {
     this.currentPawIdx = 0;
   }
 
-  setStartPosition(idx, numPlayers, viewWidthPercent, viewHeightPercent) {
+  setStartPosition(idx, numPlayers, wallHeightPercent, viewWidthPercent) {
     this.body.x = viewWidthPercent / (numPlayers + 1) * (idx + 1);
-    this.body.y = viewHeightPercent / 2;
+    this.body.y = wallHeightPercent - .2;
   }
 
   movePaw(targetX, targetY) {

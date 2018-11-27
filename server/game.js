@@ -10,38 +10,33 @@ class Game {
     this.viewHeightPercent = 1;
     this.viewWidthPercent = 1;
 
-    this.wall = {};
+    this.wall = new Wall(this.BOARD_HEIGHT_PERCENT, this.viewHeightPercent, this.viewWidthPercent);
     this.players = {};
   }
 
-	movePlayer(holdInput, socket){
-		let hold = this.wall.holds[holdInput]
-		if(hold){
-			let player = this.players[socket.id]
-			player.movePaw(hold.x, hold.y)
-		}
-	}
+  // Game Setup Logic
+  setupPlayer(io, socket) {
+    // Send wall to new client
+    socket.emit('wall setup', {wall: this.wall});
 
-  createPlayer(io, socket) {
     this.players[socket.id] = new Player();
-    this.setPlayerStartPositions();
-    io.emit('player joined', {players: this.players});
+    this.setPlayerStartPositions(io);
   }
 
   removePlayer(io, socket) {
     delete this.players[socket.id];
-    console.log(Object.keys(this.players));
-    this.setPlayerStartPositions();
-    io.emit('player disconnected', {players: this.players});
+    this.setPlayerStartPositions(io);
   }
 
-  setPlayerStartPositions() {
+  setPlayerStartPositions(io) {
     let playerIds = Object.keys(this.players);
 
     playerIds.forEach((playerId, idx) => {
       let player = this.players[playerId];
-      player.setStartPosition(idx, playerIds.length, this.viewHeightPercent, this.viewWidthPercent);
+      player.setStartPosition(idx, playerIds.length, this.wall.heightPercent, this.viewWidthPercent);
     });
+
+    io.emit('player setup', {players: this.players});
   }
 
   createLobby(io) {
@@ -49,18 +44,26 @@ class Game {
   }
 
   start(io) {
-    this.wall = new Wall(this.BOARD_HEIGHT_PERCENT, this.viewHeightPercent, this.viewWidthPercent);
-    io.emit('start game', {wall: this.wall});
+    io.emit('game start');
     this.broadcastState(io);
   }
 
+  // Game Update Logic
   broadcastState(io) {
     let gameState = {
-      wallYPosition: this.wall.yPosition,
+      yPosition: this.wall.yPosition,
       players: this.players
     };
 
     setInterval(() => io.emit('game state', gameState), 1000 / this.FPS);
+  }
+
+  movePlayer(holdInput, socket){
+    let hold = this.wall.holds[holdInput]
+    if(hold){
+      let player = this.players[socket.id]
+      player.movePaw(hold.x, hold.y)
+    }
   }
 }
 

@@ -14,11 +14,10 @@ let game = new Game();
 // Socket
 io.on('connection', function (socket) {
   if (Object.keys(game.players).length === 0) game.createLobby(io);
-
-  game.createPlayer(io, socket);
+  game.setupPlayer(io, socket);
 
   socket.on('disconnect', () => game.removePlayer(io, socket));
-	socket.on('movePaw', (holdInput) => game.movePlayer(holdInput, socket))
+	socket.on('movePaw', (holdInput) => game.movePlayer(holdInput, socket));
 });
 
 //Server

@@ -9,57 +9,24 @@ const PAW_SPRITE_WIDTH = 20;
 export class Players extends PIXI.Container {
   constructor() {
     super();
-    this.players = {};
+    this.players = {}; // the backend player instances
+    // this.children contains the frontent player instances
   }
 
-  addPlayers(newPlayersObj) {
-    console.log(newPlayersObj)
-    let newPlayerIds = Object.keys(newPlayersObj);
+  updateContainer(height, targetY) {
+    this.height = height;
+    this.y = targetY;
+  }
 
-    newPlayerIds.forEach(playerId => {
-      if (!this.players[playerId]) {
-        let player = newPlayersObj[playerId];
-        this.players[playerId] = player;
-        this.addChild(new Player(playerId, player));
-      } else {
-        this.updatePlayer(playerId, newPlayersObj[playerId]);
-      }
+  updatePlayers(players) {
+    // data
+    this.players = players;
+
+    // display objects
+    this.removeChildren();
+    Object.keys(players).forEach(playerId => {
+      this.addChild(new Player(playerId, players[playerId]));
     });
-  }
-
-  removePlayers(newPlayersObj) {
-    let oldPlayerIds = Object.keys(this.players);
-
-    oldPlayerIds.forEach(playerId => {
-      if (!newPlayersObj[playerId]) {
-        delete this.players[playerId];
-
-        let oldContainer = this.children.find(c => c.id === playerId);
-        this.removeChild(oldContainer);
-      } else {
-        this.updatePlayer(playerId, newPlayersObj[playerId]);
-      }
-    });
-  }
-
-  updatePlayers(newPlayersObj) {
-    let playerIds = Object.keys(newPlayersObj);
-    playerIds.forEach(playerId => this.updatePlayer(playerId, newPlayersObj[playerId]));
-  }
-
-  updatePlayer(playerId, player) {
-    this.players[playerId] = player;
-    let playerContainer = this.children.find(c => c.id === playerId);
-
-    let sprites = {};
-    playerContainer.children.forEach(sprite => {
-      sprites[sprite.name] = sprite;
-    });
-
-    playerContainer.setSpritePosition(sprites[player.body.name], player.body);
-    player.paws.forEach(paw => {
-      playerContainer.setSpritePosition(sprites[paw.name], paw);
-    })
   }
 
   draw() {
@@ -133,16 +100,3 @@ export class Player extends PIXI.Container {
     }
   }
 }
-
-// Update Character Sprites
-// export function moveCharacterSprites(characters) {
-//   characterContainers.forEach((container, idx) => {
-//     let character = characters[idx];
-//
-//     container.children.forEach(partSprite => {
-//       partSprite.x = character[partSprite.name].x;
-//       partSprite.y = character[partSprite.name].y;
-//       partSprite.filters = character[partSprite.name] === character.currentPaw ? [ new GlowFilter(2, 2, 0, 0xFFFFFF, .1) ] : [];
-//     });
-//   });
-// }

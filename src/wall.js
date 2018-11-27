@@ -3,6 +3,7 @@ import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH, renderGameObject} from './index';
 export default class Wall extends PIXI.Container {
 	constructor(data) {
 		super();
+		// this.height = data.heightPercent * VIEWPORT_HEIGHT;
 		this.y = (data.heightPercent * VIEWPORT_HEIGHT) * data.yPosition;
 		this.holds = data.holds;
 

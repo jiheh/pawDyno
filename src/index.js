@@ -1,6 +1,7 @@
 'use strict';
 
-require('./style.css');
+import './style.css';
+import Trianglify from 'trianglify';
 import {Players, Player} from './player';
 import Wall from './wall';
 
@@ -8,12 +9,9 @@ import Wall from './wall';
 export const VIEWPORT_HEIGHT = window.innerHeight;
 export const VIEWPORT_WIDTH = window.innerWidth;
 
-var app = new PIXI.Application({
-  width: VIEWPORT_WIDTH,
-  height: VIEWPORT_HEIGHT,
-  backgroundColor: 0x555555
-});
+var app = new PIXI.Application(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 document.body.appendChild(app.view);
+generateBackground();
 
 let holdInput = '';
 let wall = {};
@@ -65,4 +63,21 @@ function handleKeydown(event){
 
 export function renderGameObject(gameObject) {
   app.stage.addChild(gameObject);
+}
+
+function generateBackground() {
+  let pattern = Trianglify({
+    height: VIEWPORT_HEIGHT,
+    width: VIEWPORT_WIDTH,
+    cell_size: 100,
+    x_colors: 'Greys'
+  });
+  
+  let texture = PIXI.Texture.fromCanvas(pattern.canvas());
+
+  let mesh = new PIXI.mesh.Mesh(texture);
+  mesh.height = VIEWPORT_HEIGHT;
+  mesh.width = VIEWPORT_WIDTH;
+
+  renderGameObject(mesh);
 }

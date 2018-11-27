@@ -69,6 +69,20 @@ export default class Game extends PIXI.Application {
     }
   }
 
+	checkPlayerStatus(socket) {
+		for(let player of this.players.children){
+			let inView = false
+			for(let playerPart of player.children){
+				if(playerPart.y < -this.yPos + VIEWPORT_HEIGHT){
+					inView = true
+				}
+			}
+			if(!inView){
+				socket.emit('player lost')
+			}
+		}
+	}
+
 	handleKeydown(event, socket){
 		if (event.keyCode === 13) { // enter
 			if (this.wall.holds[this.holdInput]) {

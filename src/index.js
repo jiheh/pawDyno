@@ -37,6 +37,7 @@ function startGame(data) {
 function mainLoop(data) {
   game.updatePlayers(data.players);
 	game.updateYPos();
+	game.checkPlayerStatus(socket)
 }
 
 // Helper Functions

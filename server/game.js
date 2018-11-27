@@ -72,6 +72,10 @@ class Game {
       player.movePaw(hold);
     }
   }
+
+	endPlayer(socketId){
+		this.players[socketId].isAlive = false;
+	}
 }
 
 module.exports = Game;

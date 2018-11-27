@@ -8,6 +8,7 @@ class Player {
       new PlayerPart('rightLeg')
     ];
     this.currentPawIdx = 0;
+		this.isAlive = true;
   }
 
   setStartPosition(idx, numPlayers, heightPercent, widthPercent) {
@@ -17,6 +18,9 @@ class Player {
 
   movePaw(newHold) {
     // Update paw
+		if (!this.isAlive){
+			return
+		}
     if (!newHold.inUse) {
       let currentPaw = this.paws[this.currentPawIdx];
 

@@ -1,35 +1,28 @@
 'use strict';
 
 const Express = require('express');
-const { resolve } = require('path')
-const { Character } = require('./character')
+const { resolve } = require('path');
+const Game = require('./game');
 
 const app = new Express();
-let port = process.env.PORT || 3000;
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
+// Global Variables
+let game = new Game();
 
-const gameStartTimer = 3000;
-let players = {};
-
-//Socket
+// Socket
 io.on('connection', function (socket) {
-  if (Object.keys(players).length === 0) startGameTimer();
+  if (Object.keys(game.players).length === 0) game.createLobby(io);
+  game.setupPlayer(io, socket);
 
-  players[socket.id] = new Character();
-  socket.emit('player count', Object.keys(players).length);
-
-  socket.on('disconnect', () => delete players[socket.id]);
+  socket.on('disconnect', () => game.removePlayer(io, socket));
+	socket.on('movePaw', (holdInput) => game.movePlayer(holdInput, socket));
 });
 
-function startGameTimer() {
-  setTimeout(() => {
-    io.emit('start game', {numPlayers: Object.keys(players).length})
-  }, gameStartTimer);
-}
+// Server
+let port = process.env.PORT || 3000;
 
-//Server
 app.get('/', (_, res) => res.sendFile(resolve(__dirname, '..', 'public', 'index.html')));
 app.set('port', port);
 app.use(Express.static('public'));

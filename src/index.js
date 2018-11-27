@@ -1,80 +1,45 @@
 'use strict';
 
-require('./style.css');
-import {initializeCharacters, drawCharacterSprites, moveCharacterSprites} from './character';
-import {Wall} from './wall';
+import './style.css';
+import Game from './game';
+import Wall from './wall';
 
-// Global variables
-export const WIDTH = window.innerWidth;
+// Global Variables
 export const VIEWPORT_HEIGHT = window.innerHeight;
-export const GAMEBOARD_HEIGHT = VIEWPORT_HEIGHT * 2;
-export const START_TOP_YPOS = GAMEBOARD_HEIGHT - VIEWPORT_HEIGHT;
-let top_ypos = START_TOP_YPOS;
+export const VIEWPORT_WIDTH = window.innerWidth;
 
-let wall;
-let characters = [];
-
-var app = new PIXI.Application({
-  width: WIDTH,
-  height: VIEWPORT_HEIGHT,
-  backgroundColor: 0x555555
-});
-document.body.appendChild(app.view);
+let game;
+let holdInput = '';
 
 // Socket
-var socket = io.connect('http://localhost:3000');
+let socket = io.connect();
 
-socket.on('connect', function(){
-  console.log(socket.id);
-});
+socket.on('env setup', data => setupEnvironment(data));
+socket.on('players setup', data => setupPlayers(data));
+socket.on('game start', data => startGame(data));
+socket.on('game state', data => mainLoop(data));
 
-socket.on('player count', function(data){
-  console.log(`you are player ${data}`);
-});
-
-socket.on('start game', data => startGame(data.numPlayers));
-
-// socket.on('news', function (data) {
-// 	console.log(data);
-// 	socket.emit('my other event', { my: 'data' });
-// });
-
-// Game Setup
-function startGame(numPlayers) {
-  // TODO: character movement hardcoded to character 0 and only looking for one letter label
-  document.addEventListener('keydown', event => moveCharacter(characters[0], event));
-
-  wall = new Wall();
-  wall.draw();
-
-  characters = initializeCharacters(numPlayers);
-  drawCharacterSprites(characters);
-
-  mainLoop();
+// Game Logic
+function setupEnvironment(data) {
+  game = new Game(data.heightPercent, data.yPosPercent);
+  document.body.appendChild(game.view);
 }
 
-// Game Loop and Logic
-function mainLoop() {
-  if(wall.top_ypos > 0) {
-    wall.shift()
-  }
-
-  wall.render();
-  moveCharacterSprites(characters);
-
-  requestAnimationFrame(mainLoop);
+function setupPlayers(data) {
+  game.updatePlayers(data.players);
 }
 
-function moveCharacter(character, event) {
-  let key = event.key;
-  let hold = wall.filter(hold => hold.label === key)[0];
+function startGame(data) {
+  game.createWall(data.wall);
+  document.addEventListener('keydown', event => game.handleKeydown(event, socket));
+}
 
-  if (hold) {
-    character.move(hold.x, hold.y);
-  }
+function mainLoop(data) {
+  game.updatePlayers(data.players);
+	game.updateYPos();
 }
 
 // Helper Functions
 export function renderGameObject(gameObject) {
-  app.stage.addChild(gameObject);
+  game.stage.addChild(gameObject);
 }

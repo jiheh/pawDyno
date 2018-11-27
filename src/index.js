@@ -1,80 +1,45 @@
 'use strict';
 
-require('./style.css');
-import {Players, Player} from './player';
+import './style.css';
+import Game from './game';
 import Wall from './wall';
 
-// Global variables
+// Global Variables
 export const VIEWPORT_HEIGHT = window.innerHeight;
 export const VIEWPORT_WIDTH = window.innerWidth;
 
-var app = new PIXI.Application({
-  width: VIEWPORT_WIDTH,
-  height: VIEWPORT_HEIGHT,
-  backgroundColor: 0x555555
-});
-document.body.appendChild(app.view);
-
-let wall = {};
-let players = new Players();
-players.draw();
+let game;
+let holdInput = '';
 
 // Socket
-var socket = io.connect('http://localhost:3000');
+let socket = io.connect();
 
-socket.on('player joined', data => {
-  players.addPlayers(data.players);
-});
-socket.on('player disconnected', data => {
-  console.log(data.players)
-  players.removePlayers(data.players);
-});
+socket.on('env setup', data => setupEnvironment(data));
+socket.on('players setup', data => setupPlayers(data));
+socket.on('game start', data => startGame(data));
+socket.on('game state', data => mainLoop(data));
 
-socket.on('start game', data => {
-  startGame(data.wall);
-});
-
-socket.on('game state', data => {
-  players.updatePlayers(data.players);
-});
-
-// Game Setup
-function startGame(wallData) {
-  // TODO: character movement hardcoded to character 0 and only looking for one letter label
-  // document.addEventListener('keydown', event => moveCharacter(characters[0], event));
-  wall = new Wall(wallData);
-  wall.draw();
-
-  // renderPlayerSprites(players);
-
-  // characters = initializeCharacters(numPlayers);
-  // drawCharacterSprites(characters);
-
-  mainLoop();
+// Game Logic
+function setupEnvironment(data) {
+  game = new Game(data.heightPercent, data.yPosPercent);
+  document.body.appendChild(game.view);
 }
 
-// Game Loop and Logic
-function mainLoop() {
-  if (wall.y < 0) {
-    wall.y += 10;
-  }
-
-  // wall.render();
-  // moveCharacterSprites(players);
-
-  requestAnimationFrame(mainLoop);
+function setupPlayers(data) {
+  game.updatePlayers(data.players);
 }
 
-// function moveCharacter(character, event) {
-//   let key = event.key;
-//   let hold = wall.filter(hold => hold.label === key)[0];
-//
-//   if (hold) {
-//     character.move(hold.x, hold.y);
-//   }
-// }
+function startGame(data) {
+  game.createWall(data.wall);
+  document.addEventListener('keydown', event => game.handleKeydown(event, socket));
+}
+
+function mainLoop(data) {
+  game.updatePlayers(data.players);
+	game.updateYPos();
+}
 
 // Helper Functions
 export function renderGameObject(gameObject) {
-  app.stage.addChild(gameObject);
+  game.stage.addChild(gameObject);
 }

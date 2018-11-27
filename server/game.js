@@ -1,58 +1,76 @@
 const Wall = require('./wall');
 const Player = require('./player');
 
+const FPS = 30;
+const LOBBY_TIMER = 3000;
+
+// All measurements are in decimals and represent the % from the top of the
+// screen (Y) or from the left of the screen (X)
+const BOARD_HEIGHT_PERCENT = 3;
+const VIEW_HEIGHT_PERCENT = 1;
+const VIEW_WIDTH_PERCENT = 1;
+
 class Game {
   constructor() {
-    this.FPS = 30;
-    this.LOBBY_TIMER = 10000;
-    this.BOARD_HEIGHT_PERCENT = 3;
-
-    this.viewHeightPercent = 1;
-    this.viewWidthPercent = 1;
+    this.heightPercent = VIEW_HEIGHT_PERCENT * BOARD_HEIGHT_PERCENT;
+    this.widthPercent = VIEW_WIDTH_PERCENT;
+		this.yPosPercent = (VIEW_HEIGHT_PERCENT / BOARD_HEIGHT_PERCENT) - VIEW_HEIGHT_PERCENT; // Max == 0
 
     this.wall = {};
     this.players = {};
   }
 
-  createPlayer(io, socket) {
+  // Player Setup
+  setupPlayer(io, socket) {
+    socket.emit('env setup', {heightPercent: this.heightPercent, yPosPercent: this.yPosPercent});
+
     this.players[socket.id] = new Player();
-    this.setPlayerStartPositions();
-    io.emit('player joined', {players: this.players});
+    this.setPlayerStartPos(io);
   }
 
   removePlayer(io, socket) {
     delete this.players[socket.id];
-    console.log(Object.keys(this.players));
-    this.setPlayerStartPositions();
-    io.emit('player disconnected', {players: this.players});
+    this.setPlayerStartPos(io);
   }
 
-  setPlayerStartPositions() {
+  setPlayerStartPos(io) {
     let playerIds = Object.keys(this.players);
 
     playerIds.forEach((playerId, idx) => {
       let player = this.players[playerId];
-      player.setStartPosition(idx, playerIds.length, this.viewHeightPercent, this.viewWidthPercent);
+      player.setStartPosition(idx, playerIds.length, this.heightPercent, this.widthPercent);
     });
+
+    io.emit('players setup', {players: this.players});
   }
 
+  // Game Setup
   createLobby(io) {
-    setTimeout(() => this.start(io), this.LOBBY_TIMER);
+    setTimeout(() => this.startGame(io), LOBBY_TIMER);
   }
 
-  start(io) {
-    this.wall = new Wall(this.BOARD_HEIGHT_PERCENT, this.viewHeightPercent, this.viewWidthPercent);
-    io.emit('start game', {wall: this.wall});
+  startGame(io) {
+    this.wall = new Wall(this.heightPercent, this.widthPercent);
+    io.emit('game start', {wall: this.wall});
     this.broadcastState(io);
   }
 
+  // Game Update
   broadcastState(io) {
     let gameState = {
-      wallYPosition: this.wall.yPosition,
+      yPosPercent: this.yPosPercent,
       players: this.players
     };
 
-    setInterval(() => io.emit('game state', gameState), 1000 / this.FPS);
+    setInterval(() => io.emit('game state', gameState), 1000 / FPS);
+  }
+
+  movePlayer(holdInput, socket) {
+    let hold = this.wall.holds[holdInput];
+    if (hold) {
+      let player = this.players[socket.id];
+      player.movePaw(hold.x, hold.y);
+    }
   }
 }
 

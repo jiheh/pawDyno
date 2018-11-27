@@ -10,20 +10,20 @@ class Player {
     this.currentPawIdx = 0;
   }
 
-  setStartPosition(idx, numPlayers, viewWidthPercent, viewHeightPercent) {
-    this.body.x = viewWidthPercent / (numPlayers + 1) * (idx + 1);
-    this.body.y = viewHeightPercent / 2;
+  setStartPosition(idx, numPlayers, heightPercent, widthPercent) {
+    this.body.x = widthPercent / (numPlayers + 1) * (idx + 1);
+    this.body.y = heightPercent - .2;
   }
 
   movePaw(targetX, targetY) {
     // Update paw
-    let currentPaws = this.paws[this.currentPawIdx];
+    let currentPaw = this.paws[this.currentPawIdx];
     currentPaw.x = targetX;
     currentPaw.y = targetY;
 
     // Update body
-    this.body.x = this.paws.reduce((sumX, paw) => sumX += paw.x, 0) / 4;
-    this.body.y = this.paws.reduce((sumY, paw) => sumY += paw.y, 0) / 4;
+    this.body.x = this.paws.reduce((sumX, paw) => sumX += paw.x ? paw.x : this.body.x, 0) / 4;
+    this.body.y = this.paws.reduce((sumY, paw) => sumY += paw.y ? paw.y : this.body.y, 0) / 4;
 
     // Update currentPawIdx
     this.currentPawIdx =

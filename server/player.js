@@ -8,6 +8,7 @@ class Player {
       new PlayerPart('rightLeg')
     ];
     this.currentPawIdx = 0;
+		this.isAlive = true;
   }
 
   setStartPosition(idx, numPlayers, heightPercent, widthPercent) {
@@ -17,7 +18,7 @@ class Player {
 
   movePaw(newHold) {
     // Update paw
-    if (!newHold.inUse) {
+		if (this.isAlive && !newHold.inUse) {
       let currentPaw = this.paws[this.currentPawIdx];
 
       if (currentPaw.hold) currentPaw.hold.inUse = false;
@@ -32,8 +33,7 @@ class Player {
       this.body.y = this.paws.reduce((sumY, paw) => sumY += paw.y ? paw.y : this.body.y, 0) / 4;
 
       // Update currentPawIdx
-      this.currentPawIdx =
-        this.currentPawIdx === 3 ? 0 : this.currentPawIdx + 1;
+      this.currentPawIdx = this.currentPawIdx === 3 ? 0 : this.currentPawIdx + 1;
     }
   }
 }

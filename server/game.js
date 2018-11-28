@@ -64,7 +64,7 @@ class Game {
       players: this.players
     };
 
-    return setInterval(() => io.emit('game state', gameState), 1000 / FPS);
+    setInterval(() => io.emit('game state', gameState), 1000 / FPS);
   }
 
   movePlayer(holdInput, socket) {

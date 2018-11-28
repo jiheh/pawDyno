@@ -9,8 +9,8 @@ export default class Game extends PIXI.Application {
 
     this.boardHeight = heightPercent * VIEWPORT_HEIGHT;
     this.yPos = heightPercent * yPosPercent * VIEWPORT_HEIGHT; // Max 0
-		this.yPosDelta = 1
-		this.holdInput = ''
+		this.yPosDelta = 1;
+		this.holdInput = '';
 
     this.createBackground();
     this.createPlayers();
@@ -72,15 +72,19 @@ export default class Game extends PIXI.Application {
 			this.yPosDelta *= DELTA_MULTIPLIER;
       this.stage.children.forEach(child => child.y = this.yPos);
     } else {
-			socket.emit('game finished');
+			socket.emit('wall complete');
 		}
   }
 
 	checkPlayerStatus(socket) {
 		let player = this.players.children.find(c => c.id == socket.id);
-		if(player.topPawY > -this.yPos + VIEWPORT_HEIGHT){
-			socket.emit('player lost')
-		}
+
+    if (player.isAlive) {
+      if (player.topPawY > -this.yPos + VIEWPORT_HEIGHT) {
+  			socket.emit('player lost');
+        console.log('you lost!');
+  		}
+    }
 	}
 
 	handleKeydown(event, socket){
@@ -99,21 +103,19 @@ export default class Game extends PIXI.Application {
 	}
 
   // Game End
-	gameOver(playerWon) {
-    if (playerWon) {
+	gameOver(playerId, scoreboard) {
+    if (scoreboard[playerId]) {
       console.log('you won')
-      this.createTextSprite('You\'re a Winner!');
     } else {
-      console.log('you lost')
-      this.createTextSprite('GAME OVER');
+      console.log('you lost but we\'re telling you again because the game is over');
     }
 	}
 
-  createTextSprite(spriteText) {
-    let text = new PIXI.Text(spriteText, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
-    text.x = VIEWPORT_WIDTH / 2;
-    text.y = this.yPos + (VIEWPORT_HEIGHT / 2);
-    this.stage.addChild(text);
-    console.log(text)
-  }
+  // createTextSprite(spriteText) {
+  //   let text = new PIXI.Text(spriteText, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+  //   text.x = VIEWPORT_WIDTH / 2;
+  //   text.y = this.yPos + (VIEWPORT_HEIGHT / 2);
+  //   this.stage.addChild(text);
+  //   console.log(text)
+  // }
 }

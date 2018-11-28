@@ -6,7 +6,7 @@ const LOBBY_TIMER = 3000;
 
 // All measurements are in decimals and represent the % from the top of the
 // screen (Y) or from the left of the screen (X)
-const BOARD_HEIGHT_PERCENT = 3;
+const BOARD_HEIGHT_PERCENT = 1.5;
 const VIEW_HEIGHT_PERCENT = 1;
 const VIEW_WIDTH_PERCENT = 1;
 
@@ -18,6 +18,8 @@ class Game {
 
     this.wall = {};
     this.players = {};
+
+    this.updateFn;
   }
 
   // Player Setup
@@ -52,7 +54,7 @@ class Game {
   startGame(io) {
     this.wall = new Wall(this.heightPercent, this.widthPercent);
     io.emit('game start', {wall: this.wall});
-    this.broadcastState(io);
+    this.updateFn = this.broadcastState(io);
   }
 
   // Game Update
@@ -62,27 +64,43 @@ class Game {
       players: this.players
     };
 
-    setInterval(() => io.emit('game state', gameState), 1000 / FPS);
+    return setInterval(() => io.emit('game state', gameState), 1000 / FPS);
   }
 
   movePlayer(holdInput, socket) {
     let hold = this.wall.holds[holdInput];
+
     if (hold) {
       let player = this.players[socket.id];
       player.movePaw(hold);
     }
   }
 
-	// Game End
-  sendLoser(socket){
-    this.players[socket.id].isAlive = false;
-    socket.emit('game end', {playerWon: false});
+  markPlayerLost(io, socketId) {
+    this.players[socketId].isAlive = false;
+
+    let playerIds = Object.keys(this.players);
+    let allPlayersLost = true;
+
+    for (let playerId in this.players) {
+      if (this.players[playerId].isAlive) {
+        allPlayersLost = false;
+        break;
+      }
+    }
+
+    if (allPlayersLost) this.sendWonLost(io);
   }
 
-	sendWinner(socket){
-		if(this.players[socket.id].isAlive){
-      socket.emit('game end', {playerWon: true});
-		}
+	// Game End
+	sendWonLost(io) {
+    let scoreboard = {};
+    Object.keys(this.players).forEach(playerId => {
+      scoreboard[playerId] = this.players[playerId].isAlive;
+    });
+
+    io.emit('game end', {scoreboard: scoreboard});
+    clearInterval(this.updateFn);
 	}
 }
 

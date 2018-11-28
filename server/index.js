@@ -3,7 +3,6 @@
 const Express = require('express');
 const {resolve} = require('path');
 const Game = require('./game');
-const {eventListener} = require ('./eventListener');
 
 const app = new Express();
 const server = require('http').Server(app);
@@ -13,11 +12,16 @@ const io = require('socket.io')(server);
 let game = new Game();
 
 // Socket
+// All listeners on index.js, all emitters on game.js
 io.on('connection', function (socket) {
   if (Object.keys(game.players).length === 0) game.createLobby(io);
   game.setupPlayer(io, socket);
+  socket.on('disconnect', () => game.removePlayer(io, socket));
 
-  eventListener(io, socket, game);
+  socket.on('move paw', (holdInput) => game.movePlayer(holdInput, socket));
+  socket.on('player lost', () => game.markPlayerLost(io, socket.id));
+
+  socket.on('wall complete', () => game.sendWonLost(io));
 });
 
 // Server

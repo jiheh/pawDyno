@@ -32,6 +32,7 @@ export class Player extends PIXI.Container {
     this.body = data.body;
     this.paws = data.paws;
     this.currentPawIdx = data.currentPawIdx;
+    this.isAlive = data.isAlive;
 		this.topPawY;
 
     this.createPlayerSprites();

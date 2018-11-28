@@ -11,6 +11,7 @@ export const VIEWPORT_WIDTH = window.innerWidth;
 let game;
 
 // Socket
+// All listeners on index.js, all emitters on game.js
 let socket = io.connect();
 
 socket.on('setup env', data => setupEnvironment(data));
@@ -38,9 +39,9 @@ function startGame(data) {
 function mainLoop(data) {
   game.updatePlayers(data.players);
 	game.updateYPos(socket);
-	game.checkPlayerStatus(socket)
+	game.checkPlayerStatus(socket);
 }
 
 function endGame(data) {
-  game.gameOver(data.playerWon);
+  game.gameOver(socket.id, data.scoreboard);
 }

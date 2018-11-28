@@ -11,7 +11,7 @@ const VIEW_HEIGHT_PERCENT = 1;
 const VIEW_WIDTH_PERCENT = 1;
 
 class Game {
-  constructor() {
+  constructor(id) {
     this.heightPercent = VIEW_HEIGHT_PERCENT * BOARD_HEIGHT_PERCENT;
     this.widthPercent = VIEW_WIDTH_PERCENT;
 		this.yPosPercent = (VIEW_HEIGHT_PERCENT / BOARD_HEIGHT_PERCENT) - VIEW_HEIGHT_PERCENT; // Max == 0
@@ -20,6 +20,8 @@ class Game {
     this.players = {};
 
     this.updateFn;
+		this.id = id;
+		this.inPlay = false;
   }
 
   // Player Setup
@@ -43,7 +45,7 @@ class Game {
       player.setStartPosition(idx, playerIds.length, this.heightPercent, this.widthPercent);
     });
 
-    io.emit('setup players', {players: this.players});
+    io.to(this.id).emit('setup players', {players: this.players});
   }
 
   // Game Setup
@@ -52,8 +54,9 @@ class Game {
   }
 
   startGame(io) {
+		this.inPlay = true;
     this.wall = new Wall(this.heightPercent, this.widthPercent);
-    io.emit('game start', {wall: this.wall});
+    io.to(this.id).emit('game start', {wall: this.wall});
     this.updateFn = this.broadcastState(io);
   }
 
@@ -64,7 +67,7 @@ class Game {
       players: this.players
     };
 
-    setInterval(() => io.emit('game state', gameState), 1000 / FPS);
+    return setInterval(() => io.to(this.id).emit('game state', gameState), 1000 / FPS);
   }
 
   movePlayer(holdInput, socket) {
@@ -99,7 +102,7 @@ class Game {
       scoreboard[playerId] = this.players[playerId].isAlive;
     });
 
-    io.emit('game end', {scoreboard: scoreboard});
+    io.to(this.id).emit('game end', {scoreboard: scoreboard});
     clearInterval(this.updateFn);
 	}
 }

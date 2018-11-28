@@ -27,8 +27,7 @@ class Game {
   // Player Setup
   setupPlayer(io, socket) {
     socket.emit('setup env', {heightPercent: this.heightPercent, yPosPercent: this.yPosPercent});
-
-    this.players[socket.id] = new Player();
+    this.players[socket.id] = new Player(socket);
     this.setPlayerStartPos(io);
   }
 
@@ -45,7 +44,7 @@ class Game {
       player.setStartPosition(idx, playerIds.length, this.heightPercent, this.widthPercent);
     });
 
-    io.to(this.id).emit('setup players', {players: this.players});
+    io.to(this.id).emit('setup players', {players: this.getPlayersData()});
   }
 
   // Game Setup
@@ -60,14 +59,35 @@ class Game {
     this.updateFn = this.broadcastState(io);
   }
 
+  resetGame(io) {
+    if (this.inPlay) {
+      this.inPlay = false;
+      this.walls = {};
+
+      Object.keys(this.players).forEach(playerId => {
+        this.setupPlayer(io, this.players[playerId].socket);
+      })
+
+      this.createLobby(io);
+    }
+  }
+
   // Game Update
   broadcastState(io) {
     let gameState = {
       // yPosPercent: this.yPosPercent,
-      players: this.players
+      players: this.getPlayersData()
     };
 
     return setInterval(() => io.to(this.id).emit('game state', gameState), 1000 / FPS);
+  }
+
+  getPlayersData() {
+    let playersData = {};
+    Object.keys(this.players).forEach(playerId => {
+      playersData[playerId] = this.players[playerId].getData();
+    });
+    return playersData;
   }
 
   movePlayer(holdInput, socket) {
@@ -92,18 +112,20 @@ class Game {
       }
     }
 
-    if (allPlayersLost) this.sendWonLost(io);
+    if (allPlayersLost) this.endGame(io);
   }
 
 	// Game End
-	sendWonLost(io) {
+	endGame(io) {
     let scoreboard = {};
     Object.keys(this.players).forEach(playerId => {
       scoreboard[playerId] = this.players[playerId].isAlive;
     });
 
     io.to(this.id).emit('game end', {scoreboard: scoreboard});
+
     clearInterval(this.updateFn);
+    setTimeout(() => this.resetGame(io), LOBBY_TIMER);
 	}
 }
 

@@ -1,5 +1,6 @@
 class Player {
-  constructor() {
+  constructor(socket) {
+    this.socket = socket;
     this.body = new PlayerPart('body');
     this.paws = [
       new PlayerPart('leftArm'),
@@ -9,6 +10,15 @@ class Player {
     ];
     this.currentPawIdx = 0;
 		this.isAlive = true;
+  }
+
+  getData() {
+    return {
+      body: this.body,
+      paws: this.paws,
+      currentPawIdx: this.currentPawIdx,
+      isAlive: this.isAlive
+    }
   }
 
   setStartPosition(idx, numPlayers, heightPercent, widthPercent) {

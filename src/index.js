@@ -9,6 +9,7 @@ export const VIEWPORT_HEIGHT = window.innerHeight;
 export const VIEWPORT_WIDTH = window.innerWidth;
 
 let game;
+let eventListenerFn;
 
 // Socket
 // All listeners on index.js, all emitters on game.js
@@ -23,6 +24,12 @@ socket.on('game end', data => endGame(data));
 
 // Game Logic
 function setupEnvironment(data) {
+  if (game) {
+    document.body.removeChild(game.view);
+    document.removeEventListener('keydown', eventListenerFn);
+    game.stage.children.forEach(child => child.removeChildren());
+  }
+
   game = new Game(data.heightPercent, data.yPosPercent);
   document.body.appendChild(game.view);
 }
@@ -33,7 +40,9 @@ function setupPlayers(data) {
 
 function startGame(data) {
   game.createWall(data.wall);
-  document.addEventListener('keydown', event => game.handleKeydown(event, socket));
+
+  eventListenerFn = (event) => game.handleKeydown(event, socket);
+  document.addEventListener('keydown', eventListenerFn);
 }
 
 function mainLoop(data) {

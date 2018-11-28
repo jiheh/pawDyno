@@ -35,7 +35,7 @@ io.on('connection', function (socket) {
   socket.on('move paw', (holdInput) => game.movePlayer(holdInput, socket));
   socket.on('player lost', () => game.markPlayerLost(io, socket.id));
 
-  socket.on('wall complete', () => game.sendWonLost(io));
+  socket.on('wall complete', () => game.endGame(io));
 });
 
 // Server
@@ -45,4 +45,3 @@ app.get('/', (_, res) => res.sendFile(resolve(__dirname, '..', 'public', 'index.
 app.set('port', port);
 app.use(Express.static('public'));
 server.listen(port, () => console.log(`Listening to port ${port}`))
-

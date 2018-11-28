@@ -9,17 +9,17 @@ export const VIEWPORT_HEIGHT = window.innerHeight;
 export const VIEWPORT_WIDTH = window.innerWidth;
 
 let game;
-let holdInput = '';
 
 // Socket
+// All listeners on index.js, all emitters on game.js
 let socket = io.connect();
 
-socket.on('env setup', data => setupEnvironment(data));
-socket.on('players setup', data => setupPlayers(data));
+socket.on('setup env', data => setupEnvironment(data));
+socket.on('setup players', data => setupPlayers(data));
+
 socket.on('game start', data => startGame(data));
 socket.on('game state', data => mainLoop(data));
-socket.on('you lost', () => game.gameOver('lose'));
-socket.on('you won', () => game.gameOver('win'));
+socket.on('game end', data => endGame(data));
 
 // Game Logic
 function setupEnvironment(data) {
@@ -39,10 +39,9 @@ function startGame(data) {
 function mainLoop(data) {
   game.updatePlayers(data.players);
 	game.updateYPos(socket);
-	game.checkPlayerStatus(socket)
+	game.checkPlayerStatus(socket);
 }
 
-// Helper Functions
-export function renderGameObject(gameObject) {
-  game.stage.addChild(gameObject);
+function endGame(data) {
+  game.gameOver(socket.id, data.scoreboard);
 }

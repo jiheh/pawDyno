@@ -1,4 +1,4 @@
-import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH, renderGameObject} from './index';
+import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from './index';
 
 export default class Wall extends PIXI.Container {
 	constructor(data) {
@@ -17,9 +17,5 @@ export default class Wall extends PIXI.Container {
 			text.position.set(hold.x * VIEWPORT_WIDTH, hold.y * VIEWPORT_HEIGHT);
 			this.addChild(text);
 		}
-	}
-
-	draw() {
-		renderGameObject(this);
 	}
 }

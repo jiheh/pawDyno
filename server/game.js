@@ -6,7 +6,7 @@ const LOBBY_TIMER = 3000;
 
 // All measurements are in decimals and represent the % from the top of the
 // screen (Y) or from the left of the screen (X)
-const BOARD_HEIGHT_PERCENT = 1.5;
+const BOARD_HEIGHT_PERCENT = 5;
 const VIEW_HEIGHT_PERCENT = 1;
 const VIEW_WIDTH_PERCENT = 1;
 

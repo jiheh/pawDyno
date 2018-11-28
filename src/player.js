@@ -1,4 +1,4 @@
-import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH, renderGameObject} from './index';
+import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from './index';
 import {GlowFilter} from '@pixi/filter-glow';
 
 const PLAYER_SPRITE_HEIGHT = 110;
@@ -13,11 +13,6 @@ export class Players extends PIXI.Container {
     // this.children contains the frontent player instances
   }
 
-  updateContainer(height, targetY) {
-    this.height = height;
-    this.y = targetY;
-  }
-
   updatePlayers(players) {
     // data
     this.players = players;
@@ -27,10 +22,6 @@ export class Players extends PIXI.Container {
     Object.keys(players).forEach(playerId => {
       this.addChild(new Player(playerId, players[playerId]));
     });
-  }
-
-  draw() {
-    renderGameObject(this);
   }
 }
 

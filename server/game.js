@@ -22,7 +22,7 @@ class Game {
 
   // Player Setup
   setupPlayer(io, socket) {
-    socket.emit('env setup', {heightPercent: this.heightPercent, yPosPercent: this.yPosPercent});
+    socket.emit('setup env', {heightPercent: this.heightPercent, yPosPercent: this.yPosPercent});
 
     this.players[socket.id] = new Player();
     this.setPlayerStartPos(io);
@@ -41,7 +41,7 @@ class Game {
       player.setStartPosition(idx, playerIds.length, this.heightPercent, this.widthPercent);
     });
 
-    io.emit('players setup', {players: this.players});
+    io.emit('setup players', {players: this.players});
   }
 
   // Game Setup
@@ -58,7 +58,7 @@ class Game {
   // Game Update
   broadcastState(io) {
     let gameState = {
-      yPosPercent: this.yPosPercent,
+      // yPosPercent: this.yPosPercent,
       players: this.players
     };
 
@@ -73,15 +73,15 @@ class Game {
     }
   }
 
-	sendLoser(socket){
-		this.players[socket.id].isAlive = false;
-		socket.emit('you lost')
-	}
-
 	// Game End
+  sendLoser(socket){
+    this.players[socket.id].isAlive = false;
+    socket.emit('game end', {playerWon: false});
+  }
+
 	sendWinner(socket){
 		if(this.players[socket.id].isAlive){
-			socket.emit('you won')
+      socket.emit('game end', {playerWon: true});
 		}
 	}
 }

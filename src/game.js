@@ -1,6 +1,6 @@
 import Trianglify from 'trianglify';
-import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH, renderGameObject} from './index';
-import {Players, Player} from './player';
+import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from './index';
+import {Players} from './player';
 import Wall from './wall';
 
 export default class Game extends PIXI.Application {
@@ -22,6 +22,7 @@ export default class Game extends PIXI.Application {
     // this.children : [Players, Wall, backgroundMesh]
   }
 
+  // Game Setup
   createBackground() {
     let pattern = Trianglify({
       height: this.boardHeight,
@@ -45,10 +46,6 @@ export default class Game extends PIXI.Application {
     this.players = players;
   }
 
-  updatePlayers(newPlayers) {
-    this.players.updatePlayers(newPlayers);
-  }
-
   createWall(wallData) {
     let wall = new Wall(wallData);
     this.setupChildContainer(wall);
@@ -61,13 +58,21 @@ export default class Game extends PIXI.Application {
     this.stage.addChild(child);
   }
 
+  // Game Update
+  updatePlayers(newPlayers) {
+    this.players.updatePlayers(newPlayers);
+  }
+
   updateYPos(socket) {
-    if (this.yPos <= 0) {
-			this.yPos += this.yPosDelta
-			this.yPosDelta *= 1.002
+    const DELTA_MULTIPLIER = 1.002;
+
+    // Using -5 instead of 0 to avoid overscrolling
+    if (this.yPos <= -5) {
+			this.yPos += this.yPosDelta;
+			this.yPosDelta *= DELTA_MULTIPLIER;
       this.stage.children.forEach(child => child.y = this.yPos);
-    }else{
-			socket.emit('game finished')
+    } else {
+			socket.emit('game finished');
 		}
   }
 
@@ -81,7 +86,7 @@ export default class Game extends PIXI.Application {
 	handleKeydown(event, socket){
 		if (event.keyCode === 13) { // enter
 			if (this.wall.holds[this.holdInput]) {
-				socket.emit('movePaw', this.holdInput);
+				socket.emit('move paw', this.holdInput);
 			}
 			this.holdInput = '';
 		} else if (event.keyCode === 8){ // backspace
@@ -93,12 +98,22 @@ export default class Game extends PIXI.Application {
 		}
 	}
 
-	gameOver(type){
-		console.log(type)
-		if(type === 'lose'){
-			console.log('you lost')
-		}else if(type === 'win'){
-			console.log('you won')
-		}
+  // Game End
+	gameOver(playerWon) {
+    if (playerWon) {
+      console.log('you won')
+      this.createTextSprite('You\'re a Winner!');
+    } else {
+      console.log('you lost')
+      this.createTextSprite('GAME OVER');
+    }
 	}
+
+  createTextSprite(spriteText) {
+    let text = new PIXI.Text(spriteText, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+    text.x = VIEWPORT_WIDTH / 2;
+    text.y = this.yPos + (VIEWPORT_HEIGHT / 2);
+    this.stage.addChild(text);
+    console.log(text)
+  }
 }

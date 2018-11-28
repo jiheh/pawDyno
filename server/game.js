@@ -11,7 +11,7 @@ const VIEW_HEIGHT_PERCENT = 1;
 const VIEW_WIDTH_PERCENT = 1;
 
 class Game {
-  constructor() {
+  constructor(id) {
     this.heightPercent = VIEW_HEIGHT_PERCENT * BOARD_HEIGHT_PERCENT;
     this.widthPercent = VIEW_WIDTH_PERCENT;
 		this.yPosPercent = (VIEW_HEIGHT_PERCENT / BOARD_HEIGHT_PERCENT) - VIEW_HEIGHT_PERCENT; // Max == 0
@@ -20,13 +20,14 @@ class Game {
     this.players = {};
 
     this.updateFn;
+		this.id = id;
+		this.inPlay = false;
   }
 
   // Player Setup
   setupPlayer(io, socket) {
     socket.emit('setup env', {heightPercent: this.heightPercent, yPosPercent: this.yPosPercent});
-
-    this.players[socket.id] = new Player();
+    this.players[socket.id] = new Player(socket);
     this.setPlayerStartPos(io);
   }
 
@@ -43,7 +44,7 @@ class Game {
       player.setStartPosition(idx, playerIds.length, this.heightPercent, this.widthPercent);
     });
 
-    io.emit('setup players', {players: this.players});
+    io.to(this.id).emit('setup players', {players: this.getPlayersData()});
   }
 
   // Game Setup
@@ -52,19 +53,41 @@ class Game {
   }
 
   startGame(io) {
+		this.inPlay = true;
     this.wall = new Wall(this.heightPercent, this.widthPercent);
-    io.emit('game start', {wall: this.wall});
+    io.to(this.id).emit('game start', {wall: this.wall});
     this.updateFn = this.broadcastState(io);
+  }
+
+  resetGame(io) {
+    if (this.inPlay) {
+      this.inPlay = false;
+      this.walls = {};
+
+      Object.keys(this.players).forEach(playerId => {
+        this.setupPlayer(io, this.players[playerId].socket);
+      })
+
+      this.createLobby(io);
+    }
   }
 
   // Game Update
   broadcastState(io) {
     let gameState = {
       // yPosPercent: this.yPosPercent,
-      players: this.players
+      players: this.getPlayersData()
     };
 
-    return setInterval(() => io.emit('game state', gameState), 1000 / FPS);
+    return setInterval(() => io.to(this.id).emit('game state', gameState), 1000 / FPS);
+  }
+
+  getPlayersData() {
+    let playersData = {};
+    Object.keys(this.players).forEach(playerId => {
+      playersData[playerId] = this.players[playerId].getData();
+    });
+    return playersData;
   }
 
   movePlayer(holdInput, socket) {
@@ -89,18 +112,20 @@ class Game {
       }
     }
 
-    if (allPlayersLost) this.sendWonLost(io);
+    if (allPlayersLost) this.endGame(io);
   }
 
 	// Game End
-	sendWonLost(io) {
+	endGame(io) {
     let scoreboard = {};
     Object.keys(this.players).forEach(playerId => {
       scoreboard[playerId] = this.players[playerId].isAlive;
     });
 
-    io.emit('game end', {scoreboard: scoreboard});
+    io.to(this.id).emit('game end', {scoreboard: scoreboard});
+
     clearInterval(this.updateFn);
+    setTimeout(() => this.resetGame(io), LOBBY_TIMER);
 	}
 }
 

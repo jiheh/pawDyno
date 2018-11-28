@@ -8,20 +8,34 @@ const app = new Express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-// Global Variables
-let game = new Game();
+let games = {}
 
 // Socket
 // All listeners on index.js, all emitters on game.js
 io.on('connection', function (socket) {
-  if (Object.keys(game.players).length === 0) game.createLobby(io);
+	let game;
+	let joined = false;
+	for(let gameId of Object.keys(games)){
+		game = games[gameId]
+		if(!game.inPlay){
+			socket.join(game.id)
+			joined = true;
+			break;
+		}
+	}
+	if(!joined){
+		game = new Game(socket.id);
+		game.createLobby(io);
+		games[game.id] = game;
+	}
+
   game.setupPlayer(io, socket);
   socket.on('disconnect', () => game.removePlayer(io, socket));
 
   socket.on('move paw', (holdInput) => game.movePlayer(holdInput, socket));
   socket.on('player lost', () => game.markPlayerLost(io, socket.id));
 
-  socket.on('wall complete', () => game.sendWonLost(io));
+  socket.on('wall complete', () => game.endGame(io));
 });
 
 // Server

@@ -6,7 +6,7 @@ const LOBBY_TIMER = 3000;
 
 // All measurements are in decimals and represent the % from the top of the
 // screen (Y) or from the left of the screen (X)
-const BOARD_HEIGHT_PERCENT = 1.5;
+const BOARD_HEIGHT_PERCENT = 5;
 const VIEW_HEIGHT_PERCENT = 1;
 const VIEW_WIDTH_PERCENT = 1;
 
@@ -31,6 +31,21 @@ class Game {
     this.setPlayerStartPos(io);
   }
 
+  markPlayerReady(io, socketId) {
+    this.players[socketId].isReady = true;
+    io.to(this.id).emit('setup players', {players: this.getPlayersData()});
+
+    let allPlayersReady = true;
+    for (let playerId of Object.keys(this.players)) {
+      if (!this.players[playerId].isReady) {
+        allPlayersReady = false;
+        break;
+      }
+    }
+
+    if (allPlayersReady) this.startGame(io);
+  }
+
   removePlayer(io, socket) {
     delete this.players[socket.id];
     this.setPlayerStartPos(io);
@@ -48,10 +63,6 @@ class Game {
   }
 
   // Game Setup
-  createLobby(io) {
-    setTimeout(() => this.startGame(io), LOBBY_TIMER);
-  }
-
   startGame(io) {
 		this.inPlay = true;
     this.wall = new Wall(this.heightPercent, this.widthPercent);
@@ -68,7 +79,7 @@ class Game {
         this.setupPlayer(io, this.players[playerId].socket);
       })
 
-      this.createLobby(io);
+      this.startGame(io);
     }
   }
 

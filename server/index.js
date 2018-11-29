@@ -8,28 +8,21 @@ const app = new Express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-let games = {}
+let gameRooms = [];
 
 // Socket
 // All listeners on index.js, all emitters on game.js
 io.on('connection', function (socket) {
-	let game;
-	let joined = false;
-	for(let gameId of Object.keys(games)){
-		game = games[gameId]
-		if(!game.inPlay){
-			socket.join(game.id)
-			joined = true;
-			break;
-		}
-	}
-	if(!joined){
+	let game = gameRooms.find(g => !g.inPlay);
+	if (game) {
+		socket.join(game.id);
+	} else {
 		game = new Game(socket.id);
-		game.createLobby(io);
-		games[game.id] = game;
+		gameRooms.push(game);
 	}
 
   game.setupPlayer(io, socket);
+	socket.on('player ready', () => game.markPlayerReady(io, socket.id));
   socket.on('disconnect', () => game.removePlayer(io, socket));
 
   socket.on('move paw', (holdInput) => game.movePlayer(holdInput, socket));

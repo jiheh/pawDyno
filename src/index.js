@@ -52,5 +52,5 @@ function mainLoop(data) {
 }
 
 function endGame(data) {
-  game.gameOver(socket.id, data.scoreboard);
+  game.gameOver(socket.id, data.players);
 }

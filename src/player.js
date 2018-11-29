@@ -16,6 +16,7 @@ export class Players extends PIXI.Container {
     // this.children contains the frontent player instances
   }
 
+  // Socket only passed in during initial setup
   updatePlayers(players, socket) {
     // data
     this.players = players;

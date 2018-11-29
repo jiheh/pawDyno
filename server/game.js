@@ -127,12 +127,7 @@ class Game {
 
 	// Game End
 	endGame(io) {
-    let scoreboard = {};
-    Object.keys(this.players).forEach(playerId => {
-      scoreboard[playerId] = this.players[playerId].isAlive;
-    });
-
-    io.to(this.id).emit('game end', {scoreboard: scoreboard});
+    io.to(this.id).emit('game end', {players: this.getPlayersData()});
 
     clearInterval(this.updateFn);
 		this.resetGame(io)

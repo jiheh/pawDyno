@@ -104,12 +104,26 @@ export default class Game extends PIXI.Application {
 	}
 
   // Game End
-	gameOver(playerId, scoreboard) {
-    if (scoreboard[playerId]) {
+	gameOver(playerId, players) {
+    if (players[playerId].isAlive) {
       console.log('you won')
     } else {
       console.log('you lost but we\'re telling you again because the game is over');
     }
+
+    let playersRanking = [];
+    Object.keys(players).forEach(id => {
+      let player = Object.assign(players[id], {id: id});
+      playersRanking.push(player);
+    });
+
+    playersRanking = playersRanking
+      .sort((p1, p2) => p1.body.y - p2.body.y)
+      .map((player, idx) => {
+        return `Rank${idx + 1}: ${player.id === playerId ? 'YOU' : 'NOT YOU'}`
+      });
+
+    console.log(playersRanking);
 	}
 
   // createTextSprite(spriteText) {

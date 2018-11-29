@@ -2,11 +2,10 @@ const Wall = require('./wall');
 const Player = require('./player');
 
 const FPS = 30;
-const LOBBY_TIMER = 3000;
 
 // All measurements are in decimals and represent the % from the top of the
 // screen (Y) or from the left of the screen (X)
-const BOARD_HEIGHT_PERCENT = 5;
+const BOARD_HEIGHT_PERCENT = 10;
 const VIEW_HEIGHT_PERCENT = 1;
 const VIEW_WIDTH_PERCENT = 1;
 
@@ -78,19 +77,19 @@ class Game {
       Object.keys(this.players).forEach(playerId => {
         this.setupPlayer(io, this.players[playerId].socket);
       })
-
-      this.startGame(io);
     }
   }
 
   // Game Update
   broadcastState(io) {
-    let gameState = {
-      // yPosPercent: this.yPosPercent,
-      players: this.getPlayersData()
-    };
-
-    return setInterval(() => io.to(this.id).emit('game state', gameState), 1000 / FPS);
+		return setInterval(() => {
+				let gameState = {
+					// yPosPercent: this.yPosPercent,
+					players: this.getPlayersData()
+				};
+				io.to(this.id).emit('game state', gameState)
+			}
+			, 1000 / FPS);
   }
 
   getPlayersData() {
@@ -136,7 +135,7 @@ class Game {
     io.to(this.id).emit('game end', {scoreboard: scoreboard});
 
     clearInterval(this.updateFn);
-    setTimeout(() => this.resetGame(io), LOBBY_TIMER);
+		this.resetGame(io)
 	}
 }
 

@@ -3,7 +3,7 @@
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 
 ### 2D Multiplayer Climbing Game
-Description about Paw Dyno here!
+A typing game for rock climbing enthusiasts!
 
 ### Installation
 1. Clone the repo

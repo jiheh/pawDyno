@@ -79,6 +79,7 @@ export default class Game extends PIXI.Application {
 
 	checkPlayerStatus(socket) {
 		let player = this.players.children.find(c => c.id == socket.id);
+		console.log(socket.id)
 
     if (player.isAlive) {
       if (player.topPawY > -this.yPos + VIEWPORT_HEIGHT) {

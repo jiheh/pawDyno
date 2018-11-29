@@ -82,12 +82,14 @@ class Game {
 
   // Game Update
   broadcastState(io) {
-    let gameState = {
-      // yPosPercent: this.yPosPercent,
-      players: this.getPlayersData()
-    };
-
-    return setInterval(() => io.to(this.id).emit('game state', gameState), 1000 / FPS);
+		return setInterval(() => {
+				let gameState = {
+					// yPosPercent: this.yPosPercent,
+					players: this.getPlayersData()
+				};
+				io.to(this.id).emit('game state', gameState)
+			}
+			, 1000 / FPS);
   }
 
   getPlayersData() {

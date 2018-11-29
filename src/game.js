@@ -19,7 +19,8 @@ export default class Game extends PIXI.Application {
     this.players;
     this.wall;
     this.backgroundMesh;
-    // this.children : [Players, Wall, backgroundMesh]
+    this.instructions;
+    // this.children : [Players, Wall, backgroundMesh, instructions]
   }
 
   // Game Setup
@@ -59,8 +60,8 @@ export default class Game extends PIXI.Application {
   }
 
   // Game Update
-  updatePlayers(newPlayers) {
-    this.players.updatePlayers(newPlayers);
+  updatePlayers(newPlayers, socket) {
+    this.players.updatePlayers(newPlayers, socket);
   }
 
   updateYPos(socket) {

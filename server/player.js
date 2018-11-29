@@ -1,6 +1,8 @@
 class Player {
   constructor(socket) {
     this.socket = socket;
+    this.isReady = false;
+
     this.body = new PlayerPart('body');
     this.paws = [
       new PlayerPart('leftArm'),
@@ -14,6 +16,7 @@ class Player {
 
   getData() {
     return {
+      isReady: this.isReady,
       body: this.body,
       paws: this.paws,
       currentPawIdx: this.currentPawIdx,

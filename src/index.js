@@ -16,7 +16,7 @@ let eventListenerFn;
 let socket = io.connect();
 
 socket.on('setup env', data => setupEnvironment(data));
-socket.on('setup players', data => setupPlayers(data));
+socket.on('setup players', data => setupPlayers(data, socket));
 
 socket.on('game start', data => startGame(data));
 socket.on('game state', data => mainLoop(data));
@@ -34,8 +34,8 @@ function setupEnvironment(data) {
   document.body.appendChild(game.view);
 }
 
-function setupPlayers(data) {
-  game.updatePlayers(data.players);
+function setupPlayers(data, socket) {
+  game.updatePlayers(data.players, socket);
 }
 
 function startGame(data) {

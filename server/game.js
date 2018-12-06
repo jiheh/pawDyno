@@ -64,16 +64,17 @@ class Game {
 
   // Game Setup
   startTimer(io) {
-    setTimeout(() => {if (!this.inPlay) this.startGame(io)}, LOBBY_TIMER);
+    let backendTimerFn = setTimeout(() => {if (!this.inPlay) this.startGame(io)}, LOBBY_TIMER);
 
     let timeLeft = LOBBY_TIMER;
     let timerFn = setInterval(() => {
-      if (!this.inPlay) {
-        io.to(this.id).emit('lobby timer', timeLeft);
+      if (this.inPlay || timeLeft <= 0) {
+        clearTimeout(backendTimerFn);
+        clearInterval(timerFn);
       }
 
+      io.to(this.id).emit('lobby timer', timeLeft);
       timeLeft -= 1000;
-      if (timeLeft <= 0) clearInterval(timerFn);
     }, 1000);
   }
 

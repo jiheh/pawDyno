@@ -1,7 +1,7 @@
 import Trianglify from 'trianglify';
 import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from './index';
+import {Wall, WallHighlights} from './wall';
 import {Players} from './player';
-import Wall from './wall';
 
 export default class Game extends PIXI.Application {
   constructor(heightPercent, yPosPercent) {
@@ -18,6 +18,7 @@ export default class Game extends PIXI.Application {
     // Rendering containers
     this.players;
     this.wall;
+    this.wallHighlights;
     this.backgroundMesh;
     this.instructions;
     // this.children : [Players, Wall, backgroundMesh, instructions]
@@ -38,6 +39,7 @@ export default class Game extends PIXI.Application {
     mesh.width = VIEWPORT_WIDTH;
 
     this.setupChildContainer(mesh);
+		mesh.height = this.boardHeight;
     this.backgroundMesh = mesh;
   }
 
@@ -49,12 +51,14 @@ export default class Game extends PIXI.Application {
 
   createWall(wallData) {
     let wall = new Wall(wallData);
+    let wallHighlights = new WallHighlights(wallData);
     this.setupChildContainer(wall);
+    this.setupChildContainer(wallHighlights);
     this.wall = wall;
+    this.wallHighlights = wallHighlights;
   }
 
   setupChildContainer(child) {
-    child.height = this.boardHeight;
     child.y = this.yPos;
     this.stage.addChild(child);
   }
@@ -78,7 +82,7 @@ export default class Game extends PIXI.Application {
   }
 
 	checkPlayerStatus(socket) {
-		let player = this.players.children.find(c => c.id == socket.id);
+		let player = this.players.children.find(c => c.id === socket.id);
 
     if (player.isAlive) {
       if (player.topPawY > -this.yPos + VIEWPORT_HEIGHT) {
@@ -89,17 +93,21 @@ export default class Game extends PIXI.Application {
 	}
 
 	handleKeydown(event, socket){
-		if (event.keyCode === 13) { // enter
-			if (this.wall.holds[this.holdInput]) {
-				socket.emit('move paw', this.holdInput);
+		let player = this.players.children.find(c => c.id === socket.id);
+		if(player.isAlive){
+			if (event.keyCode === 13) { // enter
+				if (this.wall.holds[this.holdInput]) {
+					socket.emit('move paw', this.holdInput);
+				}
+				this.holdInput = '';
+			} else if (event.keyCode === 8){ // backspace
+				if (this.holdInput.length > 0) {
+					this.holdInput = this.holdInput.slice(0, -1);
+				}
+			} else if (event.key.length === 1){
+				this.holdInput += event.key;
 			}
-			this.holdInput = '';
-		} else if (event.keyCode === 8){ // backspace
-			if (this.holdInput.length > 0) {
-				this.holdInput = this.holdInput.slice(0, -1);
-			}
-		} else if (event.key.length === 1){
-			this.holdInput += event.key;
+			this.wallHighlights.createHighlights(this.holdInput);
 		}
 	}
 

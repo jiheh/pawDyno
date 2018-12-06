@@ -26,7 +26,7 @@ class Player {
 
   setStartPosition(idx, numPlayers, heightPercent, widthPercent) {
     this.body.x = widthPercent / (numPlayers + 1) * (idx + 1);
-    this.body.y = heightPercent - .2;
+    this.body.y = heightPercent - .6;
   }
 
   movePaw(newHold) {

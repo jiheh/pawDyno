@@ -1,5 +1,4 @@
 import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from './index';
-import {GlowFilter} from '@pixi/filter-glow';
 
 const PLAYER_SPRITE_HEIGHT = 110;
 const PLAYER_SPRITE_WIDTH = 52;

@@ -19,6 +19,7 @@ io.on('connection', function (socket) {
 	} else {
 		game = new Game(socket.id);
 		gameRooms.push(game);
+		game.startTimer(io);
 	}
 
   game.setupPlayer(io, socket);

@@ -2,6 +2,7 @@ const Wall = require('./wall');
 const Player = require('./player');
 
 const FPS = 30;
+const LOBBY_TIMER = 30000;
 
 // All measurements are in decimals and represent the % from the top of the
 // screen (Y) or from the left of the screen (X)
@@ -62,6 +63,20 @@ class Game {
   }
 
   // Game Setup
+  startTimer(io) {
+    setTimeout(() => {if (!this.inPlay) this.startGame(io)}, LOBBY_TIMER);
+
+    let timeLeft = LOBBY_TIMER;
+    let timerFn = setInterval(() => {
+      if (!this.inPlay) {
+        io.to(this.id).emit('lobby timer', timeLeft);
+      }
+
+      timeLeft -= 1000;
+      if (timeLeft <= 0) clearInterval(timerFn);
+    }, 1000);
+  }
+
   startGame(io) {
 		this.inPlay = true;
     this.wall = new Wall(this.heightPercent, this.widthPercent);
@@ -76,7 +91,9 @@ class Game {
 
       Object.keys(this.players).forEach(playerId => {
         this.setupPlayer(io, this.players[playerId].socket);
-      })
+      });
+
+      this.startTimer(io);
     }
   }
 

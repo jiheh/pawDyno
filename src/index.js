@@ -17,6 +17,7 @@ let socket = io.connect();
 
 socket.on('setup env', data => setupEnvironment(data));
 socket.on('setup players', data => setupPlayers(data, socket));
+socket.on('lobby timer', data => console.log(data));
 
 socket.on('game start', data => startGame(data));
 socket.on('game state', data => mainLoop(data));

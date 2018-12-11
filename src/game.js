@@ -93,10 +93,11 @@ export default class Game extends PIXI.Application {
 	}
 
 	handleKeydown(event, socket){
+		console.log('******')
 		console.log(this.players.children)
 		console.log(socket.id)
-		console.log('******')
 		let player = this.players.children.find(c => c.id === socket.id);
+		console.log(player.isAlive)
 		if(player.isAlive){
 			if (event.keyCode === 13) { // enter
 				if (this.wall.holds[this.holdInput]) {

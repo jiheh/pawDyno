@@ -59,9 +59,9 @@ class Game {
       player.setStartPosition(idx, playerIds.length, this.heightPercent, this.widthPercent);
     });
 
-		console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-		console.log(this.getPlayersData())
-    io.to(this.id).emit('setup players', {players: this.getPlayersData()});
+		let playersData = this.getPlayersData()
+		playersData = playersData.map((player) => Object.assign(player, {isAlive: true}))
+    io.to(this.id).emit('setup players', {players: playersData});
   }
 
   // Game Setup

@@ -93,6 +93,9 @@ export default class Game extends PIXI.Application {
 	}
 
 	handleKeydown(event, socket){
+		console.log(this.players.children)
+		console.log(socket.id)
+		console.log('******')
 		let player = this.players.children.find(c => c.id === socket.id);
 		if(player.isAlive){
 			if (event.keyCode === 13) { // enter

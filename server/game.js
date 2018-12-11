@@ -60,7 +60,9 @@ class Game {
     });
 
 		let playersData = this.getPlayersData()
-		playersData = playersData.map((player) => Object.assign(player, {isAlive: true}))
+		for(let playerId of Object.keys(playersData)){
+			playersData[playerId].isAlive = true;
+		}
     io.to(this.id).emit('setup players', {players: playersData});
   }
 

@@ -90,6 +90,8 @@ class Game {
       this.inPlay = false;
       this.walls = {};
 
+			console.log('!!!!!!!!!!!!!')
+			console.log(this.players)
       Object.keys(this.players).forEach(playerId => {
         this.setupPlayer(io, this.players[playerId].socket);
       });

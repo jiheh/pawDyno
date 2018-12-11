@@ -2,7 +2,7 @@ const Wall = require('./wall');
 const Player = require('./player');
 
 const FPS = 30;
-const LOBBY_TIMER = 30000;
+const LOBBY_TIMER = 20000;
 
 // All measurements are in decimals and represent the % from the top of the
 // screen (Y) or from the left of the screen (X)
@@ -59,7 +59,11 @@ class Game {
       player.setStartPosition(idx, playerIds.length, this.heightPercent, this.widthPercent);
     });
 
-    io.to(this.id).emit('setup players', {players: this.getPlayersData()});
+		let playersData = this.getPlayersData()
+		for(let playerId of Object.keys(playersData)){
+			playersData[playerId].isAlive = true;
+		}
+    io.to(this.id).emit('setup players', {players: playersData});
   }
 
   // Game Setup

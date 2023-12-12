@@ -32,6 +32,7 @@ export class Player extends PIXI.Container {
     super();
     this.id = playerId;
     this.isReady = data.isReady;
+    this.characterIndex = data.characterIndex;
     this.body = data.body;
     this.paws = data.paws;
     this.currentPawIdx = data.currentPawIdx;
@@ -42,10 +43,20 @@ export class Player extends PIXI.Container {
   }
 
   createPlayerSprites(socket) {
-    this.createPlayerPartSprite(this.body, `images/character0/body.svg`, PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH);
+    this.createPlayerPartSprite(
+      this.body,
+      `images/character${this.characterIndex}/body.svg`,
+      PLAYER_SPRITE_HEIGHT,
+      PLAYER_SPRITE_WIDTH
+    );
 
     this.paws.forEach((paw) => {
-      this.createPlayerPartSprite(paw, `images/character0/paw.svg`, PAW_SPRITE_HEIGHT, PAW_SPRITE_WIDTH);
+      this.createPlayerPartSprite(
+        paw,
+        `images/character${this.characterIndex}/paw.svg`,
+        PAW_SPRITE_HEIGHT,
+        PAW_SPRITE_WIDTH
+      );
     });
 
     if (socket) this.createReadyButton(socket);
@@ -102,10 +113,10 @@ export class Player extends PIXI.Container {
     let bodyX = this.body.x * VIEWPORT_WIDTH;
     let spriteX = bodyX;
 
-    if (sprite.name === "leftArm") spriteX = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
-    else if (sprite.name === "rightArm") spriteX = bodyX + PLAYER_SPRITE_WIDTH * 0.9;
-    else if (sprite.name === "leftLeg") spriteX = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
-    else if (sprite.name === "rightLeg") spriteX = bodyX + PLAYER_SPRITE_WIDTH * 0.9;
+    if (sprite.name === "leftArm") spriteX = bodyX - PLAYER_SPRITE_WIDTH / 2 + sprite.width / 2;
+    else if (sprite.name === "rightArm") spriteX = bodyX + PLAYER_SPRITE_WIDTH / 2 + sprite.width;
+    else if (sprite.name === "leftLeg") spriteX = bodyX - PLAYER_SPRITE_WIDTH / 2 + sprite.width / 2;
+    else if (sprite.name === "rightLeg") spriteX = bodyX + PLAYER_SPRITE_WIDTH / 2 + sprite.width;
 
     return spriteX;
   }

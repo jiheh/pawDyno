@@ -10,6 +10,7 @@ class Game {
   constructor(id) {
     this.wall = {};
     this.players = {};
+    this.socketToCharacterId = {};
 
     this.updateFn;
     this.id = id;
@@ -19,7 +20,12 @@ class Game {
   // Player Setup
   setupPlayer(io, socket) {
     socket.emit("setup env", {totalWallScale: TOTAL_WALL_SCALE});
-    this.players[socket.id] = new Player(socket);
+
+    let playersCount = Object.keys(this.socketToCharacterId).length;
+    if (!this.socketToCharacterId[socket.id]) playersCount++;
+    this.socketToCharacterId[socket.id] = playersCount % 2 == 1 ? 0 : 1;
+
+    this.players[socket.id] = new Player(socket, this.socketToCharacterId[socket.id]);
     this.setPlayerStartPos(io);
   }
 
@@ -40,6 +46,7 @@ class Game {
 
   removePlayer(io, socket) {
     delete this.players[socket.id];
+    delete this.socketToCharacterId[socket.id];
     this.setPlayerStartPos(io);
   }
 

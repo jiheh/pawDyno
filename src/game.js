@@ -29,7 +29,7 @@ export default class Game {
     const pattern = Trianglify({
       width: VIEWPORT_WIDTH,
       height: this.boardHeight,
-      cellSize: 64,
+      cellSize: 72,
       xColors: "random"
     });
     const texture = PIXI.Texture.from(pattern.toCanvas());
@@ -65,7 +65,7 @@ export default class Game {
 
   // Start game at the bottom of the wall and scroll up
   updateYPos(socket) {
-    const DELTA_MULTIPLIER = 1.002;
+    const DELTA_MULTIPLIER = 1.001;
 
     // Using -5 instead of 0 to avoid overscrolling
     if (this.yPos <= -8) {
@@ -83,7 +83,9 @@ export default class Game {
     if (player.isAlive) {
       if (player.topPawY && player.topPawY > -this.yPos + VIEWPORT_HEIGHT) {
         socket.emit("player lost");
-        console.log("you lost!");
+        this.createTextSprite(
+          `You climbed ${Math.floor(100 - (player.topPawY / this.boardHeight) * 100)}% of the wall!`
+        );
       }
     }
   }
@@ -95,11 +97,8 @@ export default class Game {
     let player = this.players.children.find((c) => c.id === socket.id);
     // console.log(player.isAlive);
     if (player.isAlive) {
-      if (event.keyCode === 13) {
-        // enter
-        if (this.wall.holds[this.holdInput]) {
-          socket.emit("move paw", this.holdInput);
-        }
+      if (event.keyCode === 13 || event.keyCode === 27 || event.keyCode === 32) {
+        // enter, space, escape
         this.holdInput = "";
       } else if (event.keyCode === 8) {
         // backspace
@@ -108,6 +107,10 @@ export default class Game {
         }
       } else if (event.key.length === 1) {
         this.holdInput += event.key;
+        if (this.wall.holds[this.holdInput]) {
+          socket.emit("move paw", this.holdInput);
+          this.holdInput = "";
+        }
       }
       this.wallHighlights.createHighlights(this.holdInput);
     }
@@ -116,9 +119,10 @@ export default class Game {
   // Game End
   gameOver(playerId, players) {
     if (players[playerId].isAlive) {
-      console.log("you won");
+      console.log("Holy cow you did it!");
+      this.createTextSprite(`Holy cow!\nYou climbed the whole wall!`);
     } else {
-      console.log("you lost but we're telling you again because the game is over");
+      console.log("The game has ended!");
     }
 
     let playersRanking = [];
@@ -136,11 +140,19 @@ export default class Game {
     console.log(playersRanking);
   }
 
-  // createTextSprite(spriteText) {
-  //   let text = new PIXI.Text(spriteText, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
-  //   text.x = VIEWPORT_WIDTH / 2;
-  //   text.y = this.yPos + (VIEWPORT_HEIGHT / 2);
-  //   this.stage.addChild(text);
-  //   console.log(text)
-  // }
+  createTextSprite(spriteText) {
+    let text = new PIXI.Text(spriteText, {
+      fontFamily: "Arial",
+      fontSize: 72,
+      fill: "black",
+      align: "center",
+      stroke: "white",
+      strokeThickness: 2
+    });
+    text.anchor.set(0.5);
+    text.x = VIEWPORT_WIDTH / 2;
+    text.y = -this.yPos + VIEWPORT_HEIGHT / 2;
+
+    this.wall.addChild(text);
+  }
 }

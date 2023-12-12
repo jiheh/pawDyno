@@ -1,7 +1,7 @@
 const Wall = require("./wall");
 const Player = require("./player");
 
-const FPS = 30;
+const FPS = 60;
 const LOBBY_TIMER = 20000;
 
 const TOTAL_WALL_SCALE = 10;
@@ -21,9 +21,10 @@ class Game {
   setupPlayer(io, socket) {
     socket.emit("setup env", {totalWallScale: TOTAL_WALL_SCALE});
 
-    let playersCount = Object.keys(this.socketToCharacterId).length;
-    if (!this.socketToCharacterId[socket.id]) playersCount++;
-    this.socketToCharacterId[socket.id] = playersCount % 2 == 1 ? 0 : 1;
+    if (!this.socketToCharacterId.hasOwnProperty(socket.id)) {
+      let playersCount = Object.keys(this.socketToCharacterId).length + 1;
+      this.socketToCharacterId[socket.id] = playersCount % 2 == 1 ? 0 : 1;
+    }
 
     this.players[socket.id] = new Player(socket, this.socketToCharacterId[socket.id]);
     this.setPlayerStartPos(io);
@@ -107,7 +108,6 @@ class Game {
   broadcastState(io) {
     return setInterval(() => {
       let gameState = {
-        // yPosPercent: this.yPosPercent,
         players: this.getPlayersData()
       };
       io.to(this.id).emit("game state", gameState);
@@ -149,9 +149,11 @@ class Game {
   // Game End
   endGame(io) {
     io.to(this.id).emit("game end", {players: this.getPlayersData()});
-
     clearInterval(this.updateFn);
-    this.resetGame(io);
+
+    setTimeout(() => {
+      this.resetGame(io);
+    }, 5000);
   }
 }
 

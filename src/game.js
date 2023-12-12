@@ -1,16 +1,18 @@
-import Trianglify from 'trianglify';
-import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from './index';
-import {Wall, WallHighlights} from './wall';
-import {Players} from './player';
+import Trianglify from "trianglify";
+import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from "./index";
+import {Wall, WallHighlights} from "./wall";
+import {Players} from "./player";
+import * as PIXI from "pixi.js";
 
-export default class Game extends PIXI.Application {
-  constructor(heightPercent, yPosPercent) {
-    super(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+export default class Game {
+  constructor(pixiApp, totalWallScale) {
+    this.pixiApp = pixiApp;
 
-    this.boardHeight = heightPercent * VIEWPORT_HEIGHT;
-    this.yPos = heightPercent * yPosPercent * VIEWPORT_HEIGHT; // Max 0
-		this.yPosDelta = 1;
-		this.holdInput = '';
+    this.boardHeight = totalWallScale * VIEWPORT_HEIGHT;
+    this.yPos = -this.boardHeight + VIEWPORT_HEIGHT; // Scroll from bottom to top
+    this.yPosDelta = 1;
+
+    this.holdInput = "";
 
     this.createBackground();
     this.createPlayers();
@@ -19,48 +21,41 @@ export default class Game extends PIXI.Application {
     this.players;
     this.wall;
     this.wallHighlights;
-    this.backgroundMesh;
     this.instructions;
-    // this.children : [Players, Wall, backgroundMesh, instructions]
   }
 
   // Game Setup
   createBackground() {
-    let pattern = Trianglify({
-      height: this.boardHeight,
+    const pattern = Trianglify({
       width: VIEWPORT_WIDTH,
-      cell_size: 100,
-      x_colors: 'Greys'
+      height: this.boardHeight,
+      cellSize: 64,
+      xColors: "random"
     });
+    const texture = PIXI.Texture.from(pattern.toCanvas());
+    const sprite = PIXI.Sprite.from(texture);
+    const bgContainer = new PIXI.Container();
 
-    let texture = PIXI.Texture.fromCanvas(pattern.canvas());
-
-    let mesh = new PIXI.mesh.Mesh(texture);
-    mesh.width = VIEWPORT_WIDTH;
-
-    this.setupChildContainer(mesh);
-		mesh.height = this.boardHeight;
-    this.backgroundMesh = mesh;
+    bgContainer.addChild(sprite);
+    this.setupChildContainer(bgContainer);
   }
 
   createPlayers() {
-    let players = new Players();
-    this.setupChildContainer(players);
-    this.players = players;
+    this.players = new Players();
+    this.setupChildContainer(this.players);
   }
 
   createWall(wallData) {
-    let wall = new Wall(wallData);
-    let wallHighlights = new WallHighlights(wallData);
-    this.setupChildContainer(wall);
-    this.setupChildContainer(wallHighlights);
-    this.wall = wall;
-    this.wallHighlights = wallHighlights;
+    this.wall = new Wall(wallData);
+    this.setupChildContainer(this.wall);
+
+    this.wallHighlights = new WallHighlights(wallData);
+    this.setupChildContainer(this.wallHighlights);
   }
 
-  setupChildContainer(child) {
-    child.y = this.yPos;
-    this.stage.addChild(child);
+  setupChildContainer(container) {
+    container.y = this.yPos;
+    this.pixiApp.stage.addChild(container);
   }
 
   // Game Update
@@ -68,63 +63,66 @@ export default class Game extends PIXI.Application {
     this.players.updatePlayers(newPlayers, socket);
   }
 
+  // Start game at the bottom of the wall and scroll up
   updateYPos(socket) {
     const DELTA_MULTIPLIER = 1.002;
 
     // Using -5 instead of 0 to avoid overscrolling
-    if (this.yPos <= -5) {
-			this.yPos += this.yPosDelta;
-			this.yPosDelta *= DELTA_MULTIPLIER;
-      this.stage.children.forEach(child => child.y = this.yPos);
+    if (this.yPos <= -8) {
+      this.yPos += this.yPosDelta;
+      this.yPosDelta *= DELTA_MULTIPLIER;
+      this.pixiApp.stage.children.forEach((child) => (child.y = this.yPos));
     } else {
-			socket.emit('wall complete');
-		}
+      socket.emit("wall complete");
+    }
   }
 
-	checkPlayerStatus(socket) {
-		let player = this.players.children.find(c => c.id === socket.id);
+  checkPlayerStatus(socket) {
+    let player = this.players.children.find((c) => c.id === socket.id);
 
     if (player.isAlive) {
-      if (player.topPawY > -this.yPos + VIEWPORT_HEIGHT) {
-  			socket.emit('player lost');
-        console.log('you lost!');
-  		}
+      if (player.topPawY && player.topPawY > -this.yPos + VIEWPORT_HEIGHT) {
+        socket.emit("player lost");
+        console.log("you lost!");
+      }
     }
-	}
+  }
 
-	handleKeydown(event, socket){
-		console.log('******')
-		console.log(this.players.children)
-		console.log(socket.id)
-		let player = this.players.children.find(c => c.id === socket.id);
-		console.log(player.isAlive)
-		if(player.isAlive){
-			if (event.keyCode === 13) { // enter
-				if (this.wall.holds[this.holdInput]) {
-					socket.emit('move paw', this.holdInput);
-				}
-				this.holdInput = '';
-			} else if (event.keyCode === 8){ // backspace
-				if (this.holdInput.length > 0) {
-					this.holdInput = this.holdInput.slice(0, -1);
-				}
-			} else if (event.key.length === 1){
-				this.holdInput += event.key;
-			}
-			this.wallHighlights.createHighlights(this.holdInput);
-		}
-	}
+  handleKeydown(event, socket) {
+    // console.log("******");
+    // console.log(this.players.children);
+    // console.log(socket.id);
+    let player = this.players.children.find((c) => c.id === socket.id);
+    // console.log(player.isAlive);
+    if (player.isAlive) {
+      if (event.keyCode === 13) {
+        // enter
+        if (this.wall.holds[this.holdInput]) {
+          socket.emit("move paw", this.holdInput);
+        }
+        this.holdInput = "";
+      } else if (event.keyCode === 8) {
+        // backspace
+        if (this.holdInput.length > 0) {
+          this.holdInput = this.holdInput.slice(0, -1);
+        }
+      } else if (event.key.length === 1) {
+        this.holdInput += event.key;
+      }
+      this.wallHighlights.createHighlights(this.holdInput);
+    }
+  }
 
   // Game End
-	gameOver(playerId, players) {
+  gameOver(playerId, players) {
     if (players[playerId].isAlive) {
-      console.log('you won')
+      console.log("you won");
     } else {
-      console.log('you lost but we\'re telling you again because the game is over');
+      console.log("you lost but we're telling you again because the game is over");
     }
 
     let playersRanking = [];
-    Object.keys(players).forEach(id => {
+    Object.keys(players).forEach((id) => {
       let player = Object.assign(players[id], {id: id});
       playersRanking.push(player);
     });
@@ -132,11 +130,11 @@ export default class Game extends PIXI.Application {
     playersRanking = playersRanking
       .sort((p1, p2) => p1.body.y - p2.body.y)
       .map((player, idx) => {
-        return `Rank${idx + 1}: ${player.id === playerId ? 'YOU' : 'NOT YOU'}`
+        return `Rank${idx + 1}: ${player.id === playerId ? "YOU" : "NOT YOU"}`;
       });
 
     console.log(playersRanking);
-	}
+  }
 
   // createTextSprite(spriteText) {
   //   let text = new PIXI.Text(spriteText, {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});

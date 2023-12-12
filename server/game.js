@@ -1,39 +1,31 @@
-const Wall = require('./wall');
-const Player = require('./player');
+const Wall = require("./wall");
+const Player = require("./player");
 
 const FPS = 30;
 const LOBBY_TIMER = 20000;
 
-// All measurements are in decimals and represent the % from the top of the
-// screen (Y) or from the left of the screen (X)
-const BOARD_HEIGHT_PERCENT = 10;
-const VIEW_HEIGHT_PERCENT = 1;
-const VIEW_WIDTH_PERCENT = 1;
+const TOTAL_WALL_SCALE = 10;
 
 class Game {
   constructor(id) {
-    this.heightPercent = VIEW_HEIGHT_PERCENT * BOARD_HEIGHT_PERCENT;
-    this.widthPercent = VIEW_WIDTH_PERCENT;
-		this.yPosPercent = (VIEW_HEIGHT_PERCENT / BOARD_HEIGHT_PERCENT) - VIEW_HEIGHT_PERCENT; // Max == 0
-
     this.wall = {};
     this.players = {};
 
     this.updateFn;
-		this.id = id;
-		this.inPlay = false;
+    this.id = id;
+    this.inPlay = false;
   }
 
   // Player Setup
   setupPlayer(io, socket) {
-    socket.emit('setup env', {heightPercent: this.heightPercent, yPosPercent: this.yPosPercent});
+    socket.emit("setup env", {totalWallScale: TOTAL_WALL_SCALE});
     this.players[socket.id] = new Player(socket);
     this.setPlayerStartPos(io);
   }
 
   markPlayerReady(io, socketId) {
     this.players[socketId].isReady = true;
-    io.to(this.id).emit('setup players', {players: this.getPlayersData()});
+    io.to(this.id).emit("setup players", {players: this.getPlayersData()});
 
     let allPlayersReady = true;
     for (let playerId of Object.keys(this.players)) {
@@ -56,19 +48,21 @@ class Game {
 
     playerIds.forEach((playerId, idx) => {
       let player = this.players[playerId];
-      player.setStartPosition(idx, playerIds.length, this.heightPercent, this.widthPercent);
+      player.setStartPosition(idx, playerIds.length, TOTAL_WALL_SCALE);
     });
 
-		let playersData = this.getPlayersData()
-		for(let playerId of Object.keys(playersData)){
-			playersData[playerId].isAlive = true;
-		}
-    io.to(this.id).emit('setup players', {players: playersData});
+    let playersData = this.getPlayersData();
+    for (let playerId of Object.keys(playersData)) {
+      playersData[playerId].isAlive = true;
+    }
+    io.to(this.id).emit("setup players", {players: playersData});
   }
 
   // Game Setup
   startTimer(io) {
-    let backendTimerFn = setTimeout(() => {if (!this.inPlay) this.startGame(io)}, LOBBY_TIMER);
+    let backendTimerFn = setTimeout(() => {
+      if (!this.inPlay) this.startGame(io);
+    }, LOBBY_TIMER);
 
     let timeLeft = LOBBY_TIMER;
     let timerFn = setInterval(() => {
@@ -77,15 +71,15 @@ class Game {
         clearInterval(timerFn);
       }
 
-      io.to(this.id).emit('lobby timer', timeLeft);
+      io.to(this.id).emit("lobby timer", timeLeft);
       timeLeft -= 1000;
     }, 1000);
   }
 
   startGame(io) {
-		this.inPlay = true;
-    this.wall = new Wall(this.heightPercent, this.widthPercent);
-    io.to(this.id).emit('game start', {wall: this.wall});
+    this.inPlay = true;
+    this.wall = new Wall(TOTAL_WALL_SCALE);
+    io.to(this.id).emit("game start", {wall: this.wall});
     this.updateFn = this.broadcastState(io);
   }
 
@@ -94,7 +88,7 @@ class Game {
       this.inPlay = false;
       this.walls = {};
 
-      Object.keys(this.players).forEach(playerId => {
+      Object.keys(this.players).forEach((playerId) => {
         this.setupPlayer(io, this.players[playerId].socket);
       });
 
@@ -104,19 +98,18 @@ class Game {
 
   // Game Update
   broadcastState(io) {
-		return setInterval(() => {
-				let gameState = {
-					// yPosPercent: this.yPosPercent,
-					players: this.getPlayersData()
-				};
-				io.to(this.id).emit('game state', gameState)
-			}
-			, 1000 / FPS);
+    return setInterval(() => {
+      let gameState = {
+        // yPosPercent: this.yPosPercent,
+        players: this.getPlayersData()
+      };
+      io.to(this.id).emit("game state", gameState);
+    }, 1000 / FPS);
   }
 
   getPlayersData() {
     let playersData = {};
-    Object.keys(this.players).forEach(playerId => {
+    Object.keys(this.players).forEach((playerId) => {
       playersData[playerId] = this.players[playerId].getData();
     });
     return playersData;
@@ -134,7 +127,6 @@ class Game {
   markPlayerLost(io, socketId) {
     this.players[socketId].isAlive = false;
 
-    let playerIds = Object.keys(this.players);
     let allPlayersLost = true;
 
     for (let playerId in this.players) {
@@ -147,13 +139,13 @@ class Game {
     if (allPlayersLost) this.endGame(io);
   }
 
-	// Game End
-	endGame(io) {
-    io.to(this.id).emit('game end', {players: this.getPlayersData()});
+  // Game End
+  endGame(io) {
+    io.to(this.id).emit("game end", {players: this.getPlayersData()});
 
     clearInterval(this.updateFn);
-		this.resetGame(io)
-	}
+    this.resetGame(io);
+  }
 }
 
 module.exports = Game;

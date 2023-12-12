@@ -1,4 +1,5 @@
-import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from './index';
+import {VIEWPORT_HEIGHT, VIEWPORT_WIDTH} from "./index";
+import * as PIXI from "pixi.js";
 
 const PLAYER_SPRITE_HEIGHT = 110;
 const PLAYER_SPRITE_WIDTH = 52;
@@ -7,12 +8,10 @@ const PAW_SPRITE_WIDTH = 20;
 const READY_BUTTON_HEIGHT = 46;
 const READY_BUTTON_WIDTH = 153;
 
-
 export class Players extends PIXI.Container {
   constructor() {
     super();
     this.players = {}; // the backend player instances
-    // this.children contains the frontent player instances
   }
 
   // Socket only passed in during initial setup
@@ -22,7 +21,7 @@ export class Players extends PIXI.Container {
 
     // display objects
     this.removeChildren();
-    Object.keys(players).forEach(playerId => {
+    Object.keys(players).forEach((playerId) => {
       this.addChild(new Player(playerId, players[playerId], socket));
     });
   }
@@ -37,7 +36,7 @@ export class Player extends PIXI.Container {
     this.paws = data.paws;
     this.currentPawIdx = data.currentPawIdx;
     this.isAlive = data.isAlive;
-		this.topPawY;
+    this.topPawY;
 
     this.createPlayerSprites(socket);
   }
@@ -45,7 +44,7 @@ export class Player extends PIXI.Container {
   createPlayerSprites(socket) {
     this.createPlayerPartSprite(this.body, `images/character0/body.svg`, PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH);
 
-    this.paws.forEach(paw => {
+    this.paws.forEach((paw) => {
       this.createPlayerPartSprite(paw, `images/character0/paw.svg`, PAW_SPRITE_HEIGHT, PAW_SPRITE_WIDTH);
     });
 
@@ -53,42 +52,43 @@ export class Player extends PIXI.Container {
   }
 
   createPlayerPartSprite(part, imgSrc, height, width) {
-    let sprite = PIXI.Sprite.fromImage(imgSrc);
+    let sprite = PIXI.Sprite.from(imgSrc);
 
     sprite.name = part.name;
     sprite.height = height;
     sprite.width = width;
-    sprite.x = part.x ? (part.x * VIEWPORT_WIDTH) : this.calcDefaultX(sprite);
-    sprite.y = part.y ? (part.y * VIEWPORT_HEIGHT) : this.calcDefaultY(sprite);
+    sprite.x = part.x ? part.x * VIEWPORT_WIDTH : this.calcDefaultX(sprite);
+    sprite.y = part.y
+      ? Math.min(part.y * VIEWPORT_HEIGHT, VIEWPORT_HEIGHT * 10 - sprite.height)
+      : this.calcDefaultY(sprite);
 
-
-		if(!this.topPawY || sprite.y < this.topPawY){
-			this.topPawY = sprite.y;
-		}
+    if (!this.topPawY || sprite.y < this.topPawY) {
+      this.topPawY = sprite.y;
+    }
     this.addChild(sprite);
   }
 
   createReadyButton(socket) {
     // Green Ready Button
-    let buttonTexture = PIXI.Texture.fromImage('images/readyButton/readyButton.svg');
-    let buttonTextureDown = PIXI.Texture.fromImage('images/readyButton/readyButtonDown.svg');
+    let buttonTexture = PIXI.Texture.from("images/readyButton/readyButton.svg");
+    let buttonTextureDown = PIXI.Texture.from("images/readyButton/readyButtonDown.svg");
 
     let readyButton = new PIXI.Sprite(buttonTextureDown);
     readyButton.buttonMode = true;
-    readyButton.interactive = true;
+    readyButton.eventMode = "static";
 
     readyButton.height = READY_BUTTON_HEIGHT;
     readyButton.width = READY_BUTTON_WIDTH;
-    readyButton.x = this.calcDefaultX(readyButton) - (READY_BUTTON_WIDTH / 3);
-    readyButton.y = this.calcDefaultY(readyButton) - (READY_BUTTON_HEIGHT * 1.2);
+    readyButton.x = this.calcDefaultX(readyButton) - READY_BUTTON_WIDTH / 3;
+    readyButton.y = this.calcDefaultY(readyButton) - READY_BUTTON_HEIGHT * 1.2;
 
     if (socket.id === this.id) {
       if (!this.isReady) {
         readyButton.texture = buttonTexture;
-        readyButton.on('pointerdown', function() {
+        readyButton.on("pointerdown", function () {
           this.texture = buttonTextureDown;
           this.isReady = true;
-          socket.emit('player ready');
+          socket.emit("player ready");
         });
       }
 
@@ -102,22 +102,22 @@ export class Player extends PIXI.Container {
     let bodyX = this.body.x * VIEWPORT_WIDTH;
     let spriteX = bodyX;
 
-    if (sprite.name === 'leftArm') spriteX = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
-    else if (sprite.name === 'rightArm') spriteX = bodyX + PLAYER_SPRITE_WIDTH * .9;
-    else if (sprite.name === 'leftLeg') spriteX = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
-    else if (sprite.name === 'rightLeg') spriteX = bodyX + PLAYER_SPRITE_WIDTH * .9;
+    if (sprite.name === "leftArm") spriteX = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
+    else if (sprite.name === "rightArm") spriteX = bodyX + PLAYER_SPRITE_WIDTH * 0.9;
+    else if (sprite.name === "leftLeg") spriteX = bodyX - PLAYER_SPRITE_WIDTH / 4.25;
+    else if (sprite.name === "rightLeg") spriteX = bodyX + PLAYER_SPRITE_WIDTH * 0.9;
 
     return spriteX;
   }
 
   calcDefaultY(sprite) {
-    let bodyY = this.body.y * VIEWPORT_HEIGHT;
+    let bodyY = Math.min(this.body.y * VIEWPORT_HEIGHT, VIEWPORT_HEIGHT * 10 - PLAYER_SPRITE_HEIGHT);
     let spriteY = bodyY;
 
-    if (sprite.name === 'leftArm') spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 4;
-    else if (sprite.name === 'rightArm') spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 4;
-    else if (sprite.name === 'leftLeg') spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
-    else if (sprite.name === 'rightLeg') spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
+    if (sprite.name === "leftArm") spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 4;
+    else if (sprite.name === "rightArm") spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 4;
+    else if (sprite.name === "leftLeg") spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
+    else if (sprite.name === "rightLeg") spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 1.5;
 
     return spriteY;
   }

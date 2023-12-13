@@ -49,9 +49,13 @@ function startGame(data) {
 }
 
 function mainLoop(data) {
-  game.updatePlayers(data.players);
-  game.updateYPos(socket);
-  game.checkPlayerStatus(socket);
+  game.isOver = data.isOver;
+
+  if (!game.isOver) {
+    game.updatePlayers(data.players);
+    game.checkYPos(socket);
+    game.checkPlayerStatus(socket);
+  }
 }
 
 function endGame(data) {

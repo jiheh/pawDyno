@@ -15,6 +15,7 @@ class Game {
     this.updateFn;
     this.id = id;
     this.inPlay = false;
+    this.isOver = false;
   }
 
   // Player Setup
@@ -94,6 +95,7 @@ class Game {
   resetGame(io) {
     if (this.inPlay) {
       this.inPlay = false;
+      this.isOver = false;
       this.walls = {};
 
       Object.keys(this.players).forEach((playerId) => {
@@ -106,12 +108,15 @@ class Game {
 
   // Game Update
   broadcastState(io) {
-    return setInterval(() => {
-      let gameState = {
-        players: this.getPlayersData()
-      };
-      io.to(this.id).emit("game state", gameState);
-    }, 1000 / FPS);
+    return setInterval(() => this.emitGameState(io), 1000 / FPS);
+  }
+
+  emitGameState(io) {
+    let gameState = {
+      players: this.getPlayersData(),
+      isOver: this.isOver
+    };
+    io.to(this.id).emit("game state", gameState);
   }
 
   getPlayersData() {
@@ -132,22 +137,27 @@ class Game {
   }
 
   markPlayerLost(io, socketId) {
-    this.players[socketId].isAlive = false;
+    if (this.players[socketId].isAlive) {
+      this.players[socketId].isAlive = false;
 
-    let allPlayersLost = true;
+      let allPlayersLost = true;
 
-    for (let playerId in this.players) {
-      if (this.players[playerId].isAlive) {
-        allPlayersLost = false;
-        break;
+      for (let playerId in this.players) {
+        if (this.players[playerId].isAlive) {
+          allPlayersLost = false;
+          break;
+        }
       }
-    }
 
-    if (allPlayersLost) this.endGame(io);
+      if (allPlayersLost) this.endGame(io);
+    }
   }
 
   // Game End
   endGame(io) {
+    this.isOver = true;
+    this.emitGameState(io);
+
     io.to(this.id).emit("game end", {players: this.getPlayersData()});
     clearInterval(this.updateFn);
 

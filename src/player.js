@@ -9,9 +9,10 @@ const READY_BUTTON_HEIGHT = 46;
 const READY_BUTTON_WIDTH = 153;
 
 export class Players extends PIXI.Container {
-  constructor() {
+  constructor(boardHeight) {
     super();
     this.players = {}; // the backend player instances
+    this.boardHeight = boardHeight;
   }
 
   // Socket only passed in during initial setup
@@ -22,13 +23,13 @@ export class Players extends PIXI.Container {
     // display objects
     this.removeChildren();
     Object.keys(players).forEach((playerId) => {
-      this.addChild(new Player(playerId, players[playerId], socket));
+      this.addChild(new Player(playerId, players[playerId], socket, this.boardHeight));
     });
   }
 }
 
 export class Player extends PIXI.Container {
-  constructor(playerId, data, socket) {
+  constructor(playerId, data, socket, boardHeight) {
     super();
     this.id = playerId;
     this.isReady = data.isReady;
@@ -38,6 +39,7 @@ export class Player extends PIXI.Container {
     this.currentPawIdx = data.currentPawIdx;
     this.isAlive = data.isAlive;
     this.topPawY;
+    this.boardHeight = boardHeight;
 
     this.createPlayerSprites(socket);
   }
@@ -70,7 +72,7 @@ export class Player extends PIXI.Container {
     sprite.width = width;
     sprite.x = part.x ? part.x * VIEWPORT_WIDTH : this.calcDefaultX(sprite);
     sprite.y = part.y
-      ? Math.min(part.y * VIEWPORT_HEIGHT, VIEWPORT_HEIGHT * 10 - sprite.height)
+      ? Math.min(part.y * VIEWPORT_HEIGHT, this.boardHeight - sprite.height)
       : this.calcDefaultY(sprite);
 
     if (!this.topPawY || sprite.y < this.topPawY) {
@@ -122,7 +124,7 @@ export class Player extends PIXI.Container {
   }
 
   calcDefaultY(sprite) {
-    let bodyY = Math.min(this.body.y * VIEWPORT_HEIGHT, VIEWPORT_HEIGHT * 10 - PLAYER_SPRITE_HEIGHT);
+    let bodyY = Math.min(this.body.y * VIEWPORT_HEIGHT, this.boardHeight - PLAYER_SPRITE_HEIGHT);
     let spriteY = bodyY;
 
     if (sprite.name === "leftArm") spriteY = bodyY + PLAYER_SPRITE_HEIGHT / 4;

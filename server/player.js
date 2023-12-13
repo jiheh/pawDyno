@@ -28,7 +28,7 @@ class Player {
 
   setStartPosition(idx, numPlayers, totalWallScale) {
     this.body.x = (1 / (numPlayers + 1)) * (idx + 1);
-    this.body.y = totalWallScale - 0.2; // A little room to give time to type first word
+    this.body.y = totalWallScale - 0.3; // A little room to give time to type first word
   }
 
   movePaw(newHold) {
